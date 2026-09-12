@@ -1,6 +1,6 @@
 # SecureView
 
-> A secure file encryption and sharing platform developed as a four-person Final Year Project at Monash University Malaysia.
+> A secure file encryption and sharing platform developed by the four-person **FIT3162 MCS21** Final Year Project team at Monash University Malaysia.
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-secureview.tech-2563eb?style=for-the-badge&logo=googlechrome&logoColor=white)](https://secureview.tech)
 [![Project](https://img.shields.io/badge/Project-Final_Year_Project-7c3aed?style=for-the-badge)](#overview)
@@ -10,7 +10,7 @@
 
 SecureView is a web application for encrypting, storing, sharing, and auditing access to sensitive files. The project explores how browser-side cryptography, strong authentication, fine-grained authorization, and dependable deployment practices can work together in a complete system.
 
-The platform is being built by a four-person student team at **Monash University Malaysia**. This public repository is a portfolio overview only: it documents the product, architecture, security approach, and my individual contributions without publishing the private assessment repository or operational infrastructure details.
+The platform is being built by the four-person **FIT3162 MCS21** student team at **Monash University Malaysia**. This public repository is a portfolio overview only: it documents the product, architecture, security approach, and my individual contributions without publishing the private assessment repository or operational infrastructure details.
 
 ## Key Features
 
@@ -56,14 +56,44 @@ SecureView is an academic prototype, not a claim of independently audited produc
 
 ## My Contributions
 
-My work has focused on turning the team's security design into a testable, deployable, and clearly documented system:
+My work spans the full delivery path—from implementation and security integration to testing, deployment, incident diagnosis, and project evidence.
 
-- Designed and maintained test coverage and system-verification workflows
-- Configured and improved deployment workflows across Linux, Nginx, Docker, and application services
-- Produced and synchronised technical documentation for architecture, security flows, testing, and deployment
-- Integrated security controls across frontend, backend, database, and operational boundaries
-- Implemented and refined selected frontend and backend features, including file and sharing workflows
-- Investigated cross-layer defects and verified fixes against application behaviour and deployment evidence
+### Deployment and Infrastructure
+
+- Built and maintained the guarded automatic deployment workflow for `main`, including exact-commit releases, health checks, rollback behaviour, failed-release quarantine, and service automation.
+- Deployed and hardened the application on Linux with Nginx, HTTPS/TLS, security headers, request controls, and operational health verification.
+- Diagnosed live cross-layer failures involving release permissions, deployment probes, application dependencies, audit verification, documentation access, and upload-size configuration drift.
+- Developed operational safeguards for database verification, encrypted-file storage, stale-data reconciliation, and deployment recovery.
+
+### Testing and Quality Assurance
+
+- Built real MySQL 8.4 integration and release-gate coverage for migrations, constraints, privileges, schema drift, TLS, and safe deployment behaviour.
+- Created tests for the complete encrypted-file lifecycle, including upload, storage, download, decryption, integrity failure, sharing, revocation, and audit visibility.
+- Exercised the complete MVP against a live backend and maintained automated frontend, backend, type-checking, build, lint, and dependency-verification workflows.
+- Performed extensive manual and live testing that uncovered and drove fixes for filename validation, large-transfer feedback, stale shared-file access, sharing UX, session behaviour, and audit results.
+- Created safe staging test-account tooling and runbooks without committing credentials or private keys.
+
+### Security and Product Engineering
+
+- Integrated emailed verification and password-reset flows with browser-side account-key enrolment and separation between login credentials and encryption secrets.
+- Implemented or refined client key handling, session refresh and idle relock, private-key-file recovery, recipient-specific key rewrapping, access revocation, and audit-visibility rules.
+- Delivered frontend and backend improvements across file search and pagination, encrypted download/decryption, file ownership views, access history, share management and notifications, account actions, and audit presentation.
+- Fixed security- and reliability-relevant issues across MySQL verification, authentication throttling, dependency declarations, API contracts, storage consistency, and server configuration.
+
+### Documentation and Project Coordination
+
+- Established and maintained the shared bilingual changelog and synchronised architecture, API, security, testing, database, deployment, README, and TODO documentation.
+- Built the shared delivery board and reconciled Issues, PRs, commits, milestones, acceptance criteria, deployment evidence, and individual contribution records.
+- Wrote evaluation and operator guidance so teammates and assessors could verify the system without access to private infrastructure credentials.
+
+### Contribution Snapshot
+
+As of **12 September 2026**, the private project history records:
+
+- **55 pull requests authored**, including **51 merged**
+- **111 authored commits on `main`**, comprising **60 non-merge commits** and **51 merge commits**
+
+These counts are included as a dated evidence snapshot because the active project continues to evolve.
 
 ## Tech Stack
 
@@ -101,4 +131,4 @@ Additional implementation material may be shared later when academic and team re
 
 ---
 
-**Project:** SecureView · **Institution:** Monash University Malaysia · **Team:** Four students
+**Project:** SecureView · **Institution:** Monash University Malaysia · **Team:** FIT3162 MCS21 · **Team size:** Four students
