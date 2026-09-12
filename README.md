@@ -1,5 +1,7 @@
 # SecureView
 
+**English** · [中文](README.zh-CN.md)
+
 > A secure file encryption and sharing platform developed by the four-person **FIT3162 MCS21** Final Year Project team at Monash University Malaysia.
 
 [![Live Demo](https://img.shields.io/badge/Live_Demo-secureview.tech-2563eb?style=for-the-badge&logo=googlechrome&logoColor=white)](https://secureview.tech)
