@@ -3,8 +3,7 @@
 **English** · [中文](README.zh-CN.md)
 
 > A secure file encryption and sharing platform developed by the four-person **FIT3162 MCS21** Final Year Project team at Monash University Malaysia.
-
-[![Live Demo](https://img.shields.io/badge/Live_Demo-secureview.tech-2563eb?style=for-the-badge&logo=googlechrome&logoColor=white)](https://secureview.tech)
+[![Live Site](https://img.shields.io/badge/Live_Site-secureview.tech-2563eb?style=for-the-badge&logo=googlechrome&logoColor=white)](https://secureview.tech)
 [![Project](https://img.shields.io/badge/Project-Final_Year_Project-7c3aed?style=for-the-badge)](#overview)
 [![Source](https://img.shields.io/badge/Source-Private_During_Assessment-475569?style=for-the-badge)](#source-code-availability)
 
@@ -28,19 +27,18 @@ The platform is being built by the four-person **FIT3162 MCS21** student team at
 
 ```mermaid
 flowchart LR
-    U[User Browser] -->|HTTPS| F[Vue 3 + TypeScript]
-    F -->|Encrypted files and wrapped keys| A[FastAPI Application]
-    A --> D[(MySQL)]
-    A --> S[(Encrypted File Storage)]
-    A --> L[Audit and Access-Control Services]
-    N[Nginx] --> A
-
-    classDef client fill:#dbeafe,stroke:#2563eb,color:#0f172a
-    classDef server fill:#ede9fe,stroke:#7c3aed,color:#0f172a
-    classDef data fill:#dcfce7,stroke:#16a34a,color:#0f172a
-    class U,F client
-    class N,A,L server
-    class D,S data
+U[User Browser] -->|HTTPS| F[Vue 3 + TypeScript]
+F -->|Encrypted files and wrapped keys| A[FastAPI Application]
+A --> D[(MySQL)]
+A --> S[(Encrypted File Storage)]
+A --> L[Audit and Access-Control Services]
+N[Nginx] --> A
+classDef client fill:#dbeafe,stroke:#2563eb,color:#0f172a
+classDef server fill:#ede9fe,stroke:#7c3aed,color:#0f172a
+classDef data fill:#dcfce7,stroke:#16a34a,color:#0f172a
+class U,F client
+class N,A,L server
+class D,S data
 ```
 
 At a high level, the Vue frontend handles user interaction and browser-side cryptographic operations. The FastAPI backend validates requests, applies authentication and authorization rules, coordinates application services, and stores encrypted content and related metadata. MySQL provides structured persistence, while Nginx and Linux support the deployed web service.
@@ -107,15 +105,15 @@ These counts are included as a dated evidence snapshot because the active projec
 | Cryptography | AES-GCM, ChaCha20-Poly1305, RSA-OAEP, Argon2id |
 | Infrastructure | Nginx, Linux, Docker |
 
-## Live Demo
+## Live Site
 
-Visit **[https://secureview.tech](https://secureview.tech)** to view the current project deployment.
+Visit **[https://secureview.tech](https://secureview.tech)** — the platform is live in production and open for anyone to use.
 
-The live environment is provided for demonstration and may change as the Final Year Project progresses.
+It may continue to change as the Final Year Project progresses.
 
 ## Screenshots
 
-Screenshots will be added here using demonstration accounts and fabricated data only.
+Screenshots will be added here using demonstration accounts and fabricated data only, to keep real user files and activity out of this public repository.
 
 | Dashboard | Encrypt and Upload |
 |---|---|
