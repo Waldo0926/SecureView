@@ -1,8 +1,7 @@
 # SecureView
 
 > 一个安全文件加密与共享平台，由 Monash University Malaysia **FIT3162 MCS21** 四人毕业设计小组开发。
-
-[![在线演示](https://img.shields.io/badge/在线演示-secureview.tech-2563eb?style=for-the-badge&logo=googlechrome&logoColor=white)](https://secureview.tech)
+[![在线站点](https://img.shields.io/badge/在线站点-secureview.tech-2563eb?style=for-the-badge&logo=googlechrome&logoColor=white)](https://secureview.tech)
 [![项目](https://img.shields.io/badge/项目-毕业设计-7c3aed?style=for-the-badge)](#项目概览)
 [![源码](https://img.shields.io/badge/源码-评估期间私有-475569?style=for-the-badge)](#源码开放情况)
 
@@ -104,15 +103,15 @@ SecureView 是一个学术原型，不代表经过独立审计的生产级安全
 | 加密 | AES-GCM, ChaCha20-Poly1305, RSA-OAEP, Argon2id |
 | 基础设施 | Nginx, Linux, Docker |
 
-## 在线演示
+## 在线站点
 
-访问 **[https://secureview.tech](https://secureview.tech)** 查看当前项目部署。
+访问 **[https://secureview.tech](https://secureview.tech)** —— 网站已经正式上线，任何人都可以正常使用。
 
-线上环境仅用于演示，可能随毕业设计进度而变化。
+后续可能会随着毕业设计的推进继续更新。
 
 ## 截图
 
-截图将使用演示账号和虚构数据补充在这里。
+截图会使用演示账号和虚构数据，避免在这个公开仓库里出现真实用户的文件和操作记录。
 
 | 仪表盘 | 加密与上传 |
 |---|---|
