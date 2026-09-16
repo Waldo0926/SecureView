@@ -113,15 +113,15 @@ It may continue to change as the Final Year Project progresses.
 
 ## Screenshots
 
-Screenshots will be added here using demonstration accounts and fabricated data only, to keep real user files and activity out of this public repository.
+Screenshots below use a demonstration account and fabricated data, to keep real user files and activity out of this public repository.
 
-| Dashboard | Encrypt and Upload |
+| Dashboard | Upload and Encrypt |
 |---|---|
-| _Screenshot coming soon_ | _Screenshot coming soon_ |
+| ![Dashboard](docs/screenshots/dashboard.png) | ![Upload and Encrypt](docs/screenshots/upload-and-encrypt.png) |
 
 | Share and Revoke | Audit History |
 |---|---|
-| _Screenshot coming soon_ | _Screenshot coming soon_ |
+| ![Share and Revoke](docs/screenshots/share-and-revoke.png) | ![Audit History](docs/screenshots/audit-history.png) |
 
 ## Source Code Availability
 
