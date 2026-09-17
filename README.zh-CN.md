@@ -1,5 +1,7 @@
 # SecureView
 
+[English](README.md) · **中文**
+
 > 一个安全文件加密与共享平台，由 Monash University Malaysia **FIT3162 MCS21** 四人毕业设计小组开发。
 [![在线站点](https://img.shields.io/badge/在线站点-secureview.tech-2563eb?style=for-the-badge&logo=googlechrome&logoColor=white)](https://secureview.tech)
 [![项目](https://img.shields.io/badge/项目-毕业设计-7c3aed?style=for-the-badge)](#项目概览)
@@ -111,15 +113,15 @@ SecureView 是一个学术原型，不代表经过独立审计的生产级安全
 
 ## 截图
 
-截图会使用演示账号和虚构数据，避免在这个公开仓库里出现真实用户的文件和操作记录。
+以下截图使用演示账号和虚构数据，避免在这个公开仓库里出现真实用户的文件和操作记录。
 
-| 仪表盘 | 加密与上传 |
+| 仪表盘 | 上传与加密 |
 |---|---|
-| _截图即将上传_ | _截图即将上传_ |
+| ![仪表盘](docs/screenshots/dashboard.png) | ![上传与加密](docs/screenshots/upload-and-encrypt.png) |
 
 | 共享与撤销 | 审计历史 |
 |---|---|
-| _截图即将上传_ | _截图即将上传_ |
+| ![共享与撤销](docs/screenshots/share-and-revoke.png) | ![审计历史](docs/screenshots/audit-history.png) |
 
 ## 源码开放情况
 
