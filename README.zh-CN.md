@@ -8,6 +8,7 @@
 [![API 文档](https://img.shields.io/badge/API-Swagger_UI-85ea2d?style=for-the-badge&logo=swagger&logoColor=black)](https://secureview.tech/docs)
 [![项目](https://img.shields.io/badge/项目-毕业设计-7c3aed?style=for-the-badge)](#项目概览)
 [![源码](https://img.shields.io/badge/源码-评估期间私有-475569?style=for-the-badge)](#源码开放情况)
+[![许可证](https://img.shields.io/badge/%E8%AE%B8%E5%8F%AF%E8%AF%81-%E4%BF%9D%E7%95%99%E6%89%80%E6%9C%89%E6%9D%83%E5%88%A9-dc2626?style=for-the-badge)](LICENSE)
 
 ## 项目概览
 
