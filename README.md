@@ -6,137 +6,82 @@
 
 [![Live Site](https://img.shields.io/badge/Live_Site-secureview.tech-2563eb?style=for-the-badge&logo=googlechrome&logoColor=white)](https://secureview.tech)
 [![API Docs](https://img.shields.io/badge/API-Swagger_UI-85ea2d?style=for-the-badge&logo=swagger&logoColor=black)](https://secureview.tech/docs)
-[![Project](https://img.shields.io/badge/Project-Final_Year_Project-7c3aed?style=for-the-badge)](#overview)
+[![Status](https://img.shields.io/badge/Status-Active_FYP-16a34a?style=for-the-badge)](#current-product-state)
 [![Source](https://img.shields.io/badge/Source-Private_During_Assessment-475569?style=for-the-badge)](#source-code-availability)
 [![License](https://img.shields.io/badge/License-All_Rights_Reserved-dc2626?style=for-the-badge)](LICENSE)
 
+**Public portfolio snapshot synced: 6 October 2026.**
+
 ## Overview
 
-SecureView is a web application for encrypting, storing, sharing, and auditing access to sensitive files. Files are encrypted in the browser before upload, so the server only ever stores ciphertext, public keys, encrypted private-key bundles, and wrapped file keys. A user's passphrase, plaintext private key, file keys, and plaintext files never appear in an API request or a database row.
+SecureView encrypts files **inside the browser before upload**, stores only ciphertext and wrapped key material on the server, and lets authorised users share, revoke, download and audit access to encrypted files.
 
-The browser MVP works end to end at [secureview.tech](https://secureview.tech), and the live API can be inspected in [Swagger UI](https://secureview.tech/docs). The remaining work is production hardening rather than unfinished features.
+The server stores public keys, encrypted private-key bundles, ciphertext and wrapped file keys. A user's encryption passphrase, plaintext private key, plaintext file key and plaintext file do not belong in an API request or database row.
 
-This public repository is a portfolio overview only. It documents the product, architecture, security approach, testing evidence, and my individual contributions without publishing the private assessment repository or operational infrastructure details.
+The end-to-end browser MVP is live at **[https://secureview.tech](https://secureview.tech)**. This public repository is a curated portfolio mirror: it documents the current product, architecture, testing evidence, screenshots, demo media and my contributions without publishing the private assessment source repository, credentials, test accounts or operational secrets.
 
-## Key Features
+## Current Product State
 
-- **Client-side authenticated encryption** with six selectable AEAD suites per file: AES-128/192/256-GCM, AES-256-GCM-SIV, ChaCha20-Poly1305 and XChaCha20-Poly1305 (AES-256-GCM by default)
-- **Key wrapping and sharing** by re-wrapping the file key to the recipient's RSA public key, with recipient and key-fingerprint confirmation before sharing
-- **Revocation** of future server-mediated access, plus per-file access history
-- **Integrity verification**: SHA-256 checks before every download, a daily integrity sweep, and an admin Integrity view with single-file restore from backup
-- **Tamper-evident audit log** with hash chaining, verifiable by administrators
-- **Role-based access control** (USER, ADMIN, RECOVERY_OFFICER) with an offline-governed recovery workflow
-- **Security agent**: a rule-based, read-only admin view that ranks findings from the audit log, integrity checks and recovery requests, with evidence and a recommended action
-- **Help assistant**: answers how-to and "why not Google Drive / WhatsApp" questions entirely in the browser, with no language model and no network call
-- **Encryption evidence in the UI**: the upload page shows each real encryption step with measured timings, and an encrypted preview shows what the server actually stores
-- **Bilingual interface** (English and Simplified Chinese), responsive layouts for phones, and public Education, Help and Contact pages
+The current build is beyond the original MVP and includes the following:
+
+- **Six client-side AEAD choices per file:** AES-128-GCM, AES-192-GCM, AES-256-GCM, AES-256-GCM-SIV, ChaCha20-Poly1305 and XChaCha20-Poly1305. AES-256-GCM remains the default.
+- **RSA-OAEP key wrapping:** the file data-encryption key is re-wrapped in the browser to each authorised recipient's public key.
+- **Controlled sharing and revocation:** share by exact username or email, confirm the recipient key fingerprint, and revoke future server-mediated access.
+- **File details and encryption evidence:** exact plaintext/ciphertext sizes, ciphertext SHA-256, access list, activity history, encrypted download, ciphertext preview and measured encryption steps.
+- **Integrity protection:** SHA-256 verification before download, authenticated-encryption tag checks, daily integrity sweeps and an admin Integrity view.
+- **Tamper-evident audit history:** security-sensitive events are hash chained and can be verified by administrators.
+- **Role-based administration:** USER, ADMIN and RECOVERY_OFFICER roles, with governed recovery workflows.
+- **Security Agent:** a read-only rule-based admin view that ranks security findings with evidence and recommended actions.
+- **Account administration:** admins can inspect account metadata and reset a user's **login password** to a one-time temporary password; users can then choose their own login password in Settings. The encryption passphrase remains client-side and is never shown to administrators.
+- **Help Assistant:** a local browser assistant for how-to and product questions. It uses curated project content, not a language model, and does not send the question to a remote service.
+- **English / Simplified Chinese UI:** language switching across the public site and authenticated workspace.
+- **Redesigned interface:** the current "Sealed" visual system includes a signed-in sidebar, centred page headers, a Seal Receipt on upload, a responsive My Files details panel, responsive mobile layouts and refreshed public pages.
+
+## Latest Walkthrough
+
+The old screenshots previously stored in this portfolio repository were removed because they showed an earlier interface. The six images below are the **current walkthrough captured after the October UI redesign**, using fabricated demo data.
+
+| 1. Choose a file | 2. Encrypt in the browser |
+|---|---|
+| ![Choose a file](https://secureview.tech/walkthrough/01-select.webp) | ![Encrypt in the browser](https://secureview.tech/walkthrough/02-encrypt.webp) |
+
+| 3. Manage the encrypted file | 4. Share to a checked recipient |
+|---|---|
+| ![Manage the encrypted file](https://secureview.tech/walkthrough/03-file.webp) | ![Share to a checked recipient](https://secureview.tech/walkthrough/04-recipient.webp) |
+
+| 5. Recipient unlocks locally | 6. Verify and download |
+|---|---|
+| ![Recipient unlocks locally](https://secureview.tech/walkthrough/05-unlock.webp) | ![Verify and download](https://secureview.tech/walkthrough/06-download.webp) |
+
+### Demo videos
+
+The public Help page also uses three freshly re-recorded clips from the redesigned interface:
+
+- **[How SecureView works](https://secureview.tech/videos/how-it-works.mp4)** — product flow and trust boundary.
+- **[Encrypt and upload](https://secureview.tech/videos/encrypt-upload.mp4)** — local encryption, sealing and upload.
+- **[Share and open](https://secureview.tech/videos/share-open.mp4)** — recipient verification, sharing and local unlock.
+
+See **[docs/DEMO.md](docs/DEMO.md)** for posters, Chinese walkthrough images and the media manifest.
 
 ## Architecture
 
-```mermaid
+~~~mermaid
 flowchart LR
 U[User Browser<br/>WebCrypto + AEAD] -->|HTTPS| N[Nginx]
 N --> F[Vue 3 + TypeScript SPA]
 N -->|/api/v1| A[FastAPI]
 A --> D[(MySQL 8.4)]
 A --> S[(Encrypted Object Storage)]
-A --> L[Audit Chain, RBAC and Security Agent]
+A --> L[Audit Chain, RBAC, Integrity and Security Agent]
 classDef client fill:#dbeafe,stroke:#2563eb,color:#0f172a
 classDef server fill:#ede9fe,stroke:#7c3aed,color:#0f172a
 classDef data fill:#dcfce7,stroke:#16a34a,color:#0f172a
 class U,F client
 class N,A,L server
 class D,S data
-```
+~~~
 
-The Vue frontend handles user interaction and all cryptographic operations on file content and keys. The FastAPI backend validates requests, authenticates and authorises actors, runs each use case in a transaction, appends audit records, and stores ciphertext and metadata. It never decrypts users' files. MySQL 8.4 runs under a least-privilege runtime account whose audit-log rights are limited to SELECT and INSERT.
-
-## Security Design
-
-- A fresh data-encryption key (DEK) is generated in the browser for each file and used with an authenticated encryption suite.
-- **RSA-OAEP with SHA-256** wraps each DEK for the owner and every authorised recipient.
-- **Argon2id** hashes login passwords on the server and, separately, derives the key-encryption key from the encryption passphrase in the browser. The login password and the encryption passphrase are distinct secrets.
-- A forgotten passphrase is recovered only with the user's separately kept private-key file; administrators cannot reset it.
-- Audit records are hash-chained, so editing or deleting history is detectable.
-- A self-assessed threat model documents what the design does and does not defend against, including upload-abuse limits and malware warnings for shared executables (the server holds only ciphertext and cannot scan it).
-
-SecureView is an academic prototype, not a claim of independently audited production security.
-
-## Testing and Verification
-
-Testing on this project was built to find real failures, and it did. Every number below comes from the team repository's test reports, changelog and performance records.
-
-### Automated test suites
-
-- **503 backend unit tests and 810 frontend tests** pass on the current main branch. The full backend suite against real MySQL 8.4 (633 tests, including integration) runs at about **85% branch coverage**; CI fails below 78% for the unit suite and 82% for the MySQL suite.
-- **Live end-to-end suites** run the browser's own crypto, API clients and key handling over real HTTP against a disposable API and MySQL 8.4: registration with an emailed code, refresh-token rotation and replay detection, unlock, all six ciphers, sharing and revocation, audit visibility, role denial and account deletion. CI fails if a single test is skipped.
-- **Real-browser tests**: Playwright drives Chromium through the built pages on the whole golden path (register, verify, upload, unlock, download and compare byte for byte, share, revoke, log out), with no sleeps and flaky tests counted as failures. Three more specs check phone widths at 360 px and 320 px.
-- **Concurrency tests** release real threads on separate MySQL connections at once against session limits, the audit hash chain, key rewraps, duplicate shares and recovery races. Each was validated by removing the row lock it depends on and confirming the test then fails.
-- **Fault injection** kills the database connection at commit after the ciphertext is written, makes the object store refuse writes, and sends truncated envelopes and forged signatures.
-- **Cryptographic test vectors**: the AEAD suites are checked byte for byte against OpenSSL, libsodium and the RFC 8452 vectors, shared by the browser, backend and load tool.
-- **Report hygiene**: CI artifacts are scanned for keys, tokens and fixture plaintext before upload, and Playwright traces are never published.
-
-### CI and release gates
-
-Five jobs run on every pull request on self-hosted runners isolated from production: backend, frontend, a **MySQL 8.4 release gate** (migrations from empty, grant boundaries, schema parity, refusal on non-empty databases, concurrent-migration locks, and a backup and restore drill), **live end-to-end** tests, and an **isolated tamper drill**. Only commits that pass CI are deployed.
-
-### Capacity and performance
-
-At the supervisor's request for numbers rather than claims, a load tool that encrypts and decrypts exactly like the browser was run against staging on 3–4 October 2026:
-
-- **22,264 operations**, with **5,094 downloads** decrypted and SHA-256-compared to the original and **0 integrity failures**.
-- pdf, png, jpg, mp4, zip and exe files from 1 MB to **500 MB** all round-tripped byte-exact (144 of 144).
-- 5 users on a mixed load for 108 minutes (19,372 operations) and up to 50 concurrent users with no server error.
-- At 100 users, 65–78% of uploads failed while CPU averaged 3%. The cause was traced to uploads holding a database connection while waiting for a thread pool whose threads were waiting for connections. After the fix, failed uploads at 100 users dropped from **80% to 0%** and throughput rose from **0.33 to 56 operations per second**, and the staging re-run passed 102 of 102 uploads.
-- The service recovered to zero errors on its own after each overload, and each of the three deliberate overloads triggered exactly one monitoring alert email.
-
-### Bugs found by testing
-
-- The load tool's dry run found **two MySQL deadlocks** that only appear under concurrency. A regression test reproduced one about 7 times in 10 before the fix and never after, and 28,540 requests on staging that night produced no deadlock.
-- The database-pool exhaustion at 100 users described above.
-- A layout-audit script that measures about 100 page views in five configurations found that Access Records made a forbidden request on every visit; it now reports zero errors.
-
-### Security testing
-
-- **OWASP ZAP** baseline scan of the live site: no high-risk issue (0 FAIL, 8 WARN, 59 PASS). It found missing security headers on the static bundle, which were fixed in Nginx.
-- **pip-audit and npm audit**: no findings in production dependencies.
-- **Tamper testing**: an attacker container in CI and a live, scripted demonstration both change stored ciphertext and confirm the download is refused. Rewriting the recorded SHA-256 as well is still caught by the AEAD tag and the hash-chained audit log.
-- **Backups**: encrypted off-server backups of metadata and ciphertext, verified by a clean-host restore drill.
-
-## My Contributions
-
-As of **6 October 2026** I authored **137 of the repository's 158 merged pull requests** (145 authored in total) and opened **29 issues**. My work spans the full delivery path, from implementation and security features to testing, deployment, operations, and project evidence.
-
-### Testing and Quality Engineering
-
-- Wrote the load and capacity testing tool, ran the staging capacity study, diagnosed the database-pool failure at 100 users and fixed it, and fixed the two MySQL deadlocks the tool found, with a regression test.
-- Built the CI quality gates and the MySQL 8.4 release gate, the live end-to-end stack with zero-skip enforcement, MySQL concurrency and fault-injection suites, and the Playwright golden-path test in Chromium.
-- Built the isolated VPS adversarial tamper drill, real-browser tamper acceptance tests, and the scripted live tamper demonstration.
-- Added phone-width browser tests and the layout and text audit scripts used to check every page in both languages.
-- Ran the OWASP ZAP, pip-audit and npm audit scans and fixed the security headers they flagged.
-- Earlier, opened the testing track and covered the complete encrypted-file lifecycle against a live backend, uncovering and fixing issues in audit visibility, session behaviour, sharing and storage consistency.
-
-### Security and Product Features
-
-- Added AES-256-GCM-SIV and XChaCha20-Poly1305, giving six AEAD choices per file, with per-suite nonce checks and Education content.
-- Built the **security agent** (v1 and v2): ranked findings with evidence, de-duplicated incidents, daily alerts and detection of sign-in after password guessing.
-- Built the **integrity and recovery** pipeline: daily integrity sweep, audit-anchored digests, the admin Integrity tab, and single-file restore from backup.
-- Implemented upload-abuse limits and shared-executable warnings, and recipient key-fingerprint confirmation before sharing, from the threat-model register.
-- Built the in-browser **Help assistant** (v1 and v2), the English / Simplified Chinese interface, the admin console and account details with login-password reset, the file details panel, and the encrypted preview and live encryption-step view.
-- Earlier core flows: browser download and decryption, recipient key re-wrapping, private-key-file unlock, idle relock, session renewal, account deletion, server-side filename search, and audit visibility by ownership.
-
-### Deployment and Operations
-
-- Built and maintained the guarded automatic deployment of exact, CI-passed commits, with health checks, failed-release quarantine and stalled-build recovery.
-- Deployed and hardened the Linux host: Nginx, HTTPS/TLS, security headers, rate limiting and fail2ban.
-- Added encrypted off-server backups with a clean-host restore drill, stale-data reconciliation, failure alerts, and redacted observability with external audit checkpoints.
-
-### Documentation and Coordination
-
-- Established and maintained the shared bilingual changelog and kept architecture, API, security, threat-model, testing, performance, deployment, README and TODO documentation in sync.
-- Built the team delivery board and the proposal traceability record, and wrote the final-presentation talking points, demo script, tamper-demo script and reflection.
-
-## Tech Stack
+The Vue frontend owns file-content cryptography and account-key handling. The FastAPI backend authenticates and authorises actors, validates requests, runs business transactions, appends audit records and stores encrypted objects and metadata. It does not decrypt user files.
 
 | Area | Technologies |
 |---|---|
@@ -144,30 +89,101 @@ As of **6 October 2026** I authored **137 of the repository's 158 merged pull re
 | Backend | FastAPI, Python, Pydantic, SQLAlchemy, Alembic |
 | Database | MySQL 8.4 |
 | Cryptography | AES-GCM, AES-GCM-SIV, (X)ChaCha20-Poly1305, RSA-OAEP, Argon2id, SHA-256 |
-| Testing | pytest, Vitest, Playwright, custom load-testing tool, OWASP ZAP, pip-audit, npm audit |
-| Infrastructure | Linux, Nginx, Docker, systemd, GitHub Actions (self-hosted runners) |
+| Testing | pytest, Vitest, Playwright, custom load testing, OWASP ZAP, pip-audit, npm audit |
+| Infrastructure | Linux, Nginx, Docker, systemd, GitHub Actions self-hosted runners |
+
+## Security Design
+
+- Each file receives a fresh browser-generated data-encryption key.
+- Authenticated encryption protects both confidentiality and integrity of file content.
+- RSA-OAEP with SHA-256 wraps the file key separately for the owner and each authorised recipient.
+- Login passwords are one-way hashed with Argon2id on the server.
+- The separate encryption passphrase is used in the browser to derive key-encryption material and is never sent to the server.
+- A saved private-key file can recover access if the encryption passphrase is forgotten.
+- Audit records are hash chained, making later history modification detectable.
+- Upload quotas, free-space guards and rate limits reduce storage-abuse risk.
+- Because the server stores ciphertext, it cannot inspect shared files for malware; risky executable or macro-capable files therefore trigger recipient warnings.
+
+SecureView is an **academic prototype**, not a claim of independently audited production security. The public security summary and residual-risk notes are in **[docs/SECURITY_OVERVIEW.md](docs/SECURITY_OVERVIEW.md)**.
+
+## Testing and Verification
+
+### Automated suites
+
+- **503 backend unit tests** and **810 frontend tests** pass on the current main branch.
+- The full backend suite against real MySQL 8.4 contains **633 tests** and runs at about **85% branch coverage**.
+- Live end-to-end tests cover verification-code registration, session refresh and replay rejection, account unlock, all six ciphers, upload/download, sharing/revocation, audit visibility, role denial and account deletion.
+- Playwright drives the real browser flow through registration, upload, unlock, download, byte-for-byte comparison, sharing, revocation and logout.
+- Concurrency tests target session limits, audit chaining, key rewraps, duplicate shares and recovery races.
+- Fault-injection tests exercise failed database commits, storage failures, malformed envelopes and forged signatures.
+- Cryptographic vectors are checked against OpenSSL, libsodium and RFC 8452 references.
+
+### Capacity and performance
+
+The staging capacity study on 3–4 October 2026 recorded:
+
+- **22,264 operations**.
+- **5,094 verified downloads** with **0 integrity failures**.
+- Common file types from 1 MB through **500 MB** round-tripped byte-exact.
+- No server error up to **50 concurrent users** in the measured run.
+- A 100-user run exposed a database-pool/thread-pool interaction: failed uploads reached about 80% while CPU averaged only 3%.
+- After the fix, the 100-user failure rate dropped from **80% to 0%**, throughput improved from **0.33 to 56 operations/second**, and the staging re-run completed **102/102 uploads** successfully.
+
+### Security checks
+
+- OWASP ZAP baseline scan: **0 FAIL, 8 WARN, 59 PASS**, with the reported missing static security headers subsequently fixed in Nginx.
+- pip-audit and npm audit: no findings in production dependencies at the recorded scan.
+- Tamper drills modify stored ciphertext and verify that download is refused; changing the recorded SHA-256 as well is still rejected by authenticated encryption.
+- Encrypted off-server backups are validated by a clean-host restore drill.
+
+More detail: **[docs/TESTING_AND_PERFORMANCE.md](docs/TESTING_AND_PERFORMANCE.md)**.
+
+## My Contributions
+
+As of **6 October 2026**, I authored **137 of the project's 158 merged pull requests** (**145 authored PRs** in total) and opened **29 issues**.
+
+### Testing and quality engineering
+
+- Built the load/capacity tool and ran the staging capacity study.
+- Diagnosed and fixed the 100-user database-pool failure and two MySQL concurrency deadlocks, with regression coverage.
+- Built CI quality gates, the MySQL 8.4 release gate, live end-to-end testing, concurrency/fault-injection coverage and Playwright browser tests.
+- Built the isolated tamper drill and live tamper demonstration.
+- Added responsive browser checks, layout audits and the later site-wide text audit.
+- Ran OWASP ZAP, pip-audit and npm audit and fixed the security-header findings.
+
+### Security and product features
+
+- Added AES-256-GCM-SIV and XChaCha20-Poly1305 to the original AES-GCM/ChaCha set.
+- Built the Security Agent and its later evidence/de-duplication improvements.
+- Built the integrity/recovery pipeline, daily checks and single-file restore view.
+- Implemented upload-abuse limits, risky-file warnings and recipient key-fingerprint confirmation.
+- Built the Help Assistant, bilingual interface, admin console, account details/login-password reset, file details, encrypted preview and visible encryption-step evidence.
+- Implemented earlier core browser flows including download/decryption, recipient re-wrapping, private-key-file unlock, idle relock, session renewal and account deletion.
+
+### Deployment, operations and documentation
+
+- Built and maintained guarded automatic deployment of exact CI-passed commits.
+- Deployed and hardened Nginx/HTTPS, security headers, rate limiting and fail2ban.
+- Added encrypted off-server backups, clean-host restore verification, reconciliation, monitoring and redacted operational evidence.
+- Maintained bilingual architecture, security, threat-model, testing, performance and release documentation, plus final-presentation evidence.
+
+## Public Documentation
+
+- **[CHANGELOG.md](CHANGELOG.md)** — curated public milestone history.
+- **[docs/README.md](docs/README.md)** — documentation and evidence index.
+- **[docs/DEMO.md](docs/DEMO.md)** — current screenshots, Chinese screenshots and videos.
+- **[docs/SECURITY_OVERVIEW.md](docs/SECURITY_OVERVIEW.md)** — public security model and limitations.
+- **[docs/TESTING_AND_PERFORMANCE.md](docs/TESTING_AND_PERFORMANCE.md)** — test strategy and measured performance.
 
 ## Live Site
 
-Visit **[https://secureview.tech](https://secureview.tech)** (always use the `https://` prefix). The platform is live and open to try, and it may keep changing as the Final Year Project progresses.
-
-## Screenshots
-
-Screenshots below use a demonstration account and fabricated data, to keep real user files and activity out of this public repository. Some predate the latest interface redesign.
-
-| Dashboard | Upload and Encrypt |
-|---|---|
-| ![Dashboard](docs/screenshots/dashboard.png) | ![Upload and Encrypt](docs/screenshots/upload-and-encrypt.png) |
-
-| Share and Revoke | Audit History |
-|---|---|
-| ![Share and Revoke](docs/screenshots/share-and-revoke.png) | ![Audit History](docs/screenshots/audit-history.png) |
+Visit **[https://secureview.tech](https://secureview.tech)** and include the https:// prefix.
 
 ## Source Code Availability
 
-The main source repository remains private while this university team project is under active assessment. This portfolio repository intentionally contains no private source code, credentials, private repository links, server addresses, or internal deployment details.
+The main implementation repository remains private while the university team project is under active assessment. This portfolio repository intentionally excludes private source code, credentials, test-account secrets, private-key material and internal deployment details.
 
-Additional implementation material may be shared later when academic and team requirements allow.
+More implementation material may be published later when academic and team requirements allow.
 
 ---
 
