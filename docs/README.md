@@ -6,7 +6,7 @@ This folder contains the **public portfolio documentation** for SecureView. It i
 
 | Document | What it contains |
 |---|---|
-| [DEMO.md](DEMO.md) | Current six-step English/Chinese walkthrough, demo video posters and public media links |
+| [MEDIA.md](MEDIA.md) | Current six-step English/Chinese walkthrough, video posters and public media links |
 | [SECURITY_OVERVIEW.md](SECURITY_OVERVIEW.md) | Public security architecture, trust boundary and important limitations |
 | [TESTING_AND_PERFORMANCE.md](TESTING_AND_PERFORMANCE.md) | Test strategy, capacity study, security scans and measured results |
 | [../CHANGELOG.md](../CHANGELOG.md) | Curated public project milestones |
@@ -24,7 +24,7 @@ This folder contains the **public portfolio documentation** for SecureView. It i
 Safe to publish here:
 
 - current product screenshots made with fabricated data;
-- public Help/demo videos;
+- public Help videos;
 - architecture and security concepts;
 - aggregated test/performance evidence;
 - project and contribution summaries.

@@ -6,7 +6,7 @@
 
 [![Live Site](https://img.shields.io/badge/Live_Site-secureview.tech-2563eb?style=for-the-badge&logo=googlechrome&logoColor=white)](https://secureview.tech)
 [![API Docs](https://img.shields.io/badge/API-Swagger_UI-85ea2d?style=for-the-badge&logo=swagger&logoColor=black)](https://secureview.tech/docs)
-[![Status](https://img.shields.io/badge/Status-Active_FYP-16a34a?style=for-the-badge)](#current-product-state)
+[![Status](https://img.shields.io/badge/Status-In_Production-16a34a?style=for-the-badge)](#current-product-state)
 [![Source](https://img.shields.io/badge/Source-Private_During_Assessment-475569?style=for-the-badge)](#source-code-availability)
 [![License](https://img.shields.io/badge/License-All_Rights_Reserved-dc2626?style=for-the-badge)](LICENSE)
 
@@ -18,11 +18,11 @@ SecureView encrypts files **inside the browser before upload**, stores only ciph
 
 The server stores public keys, encrypted private-key bundles, ciphertext and wrapped file keys. A user's encryption passphrase, plaintext private key, plaintext file key and plaintext file do not belong in an API request or database row.
 
-The end-to-end browser MVP is live at **[https://secureview.tech](https://secureview.tech)**. This public repository is a curated portfolio mirror: it documents the current product, architecture, testing evidence, screenshots, demo media and my contributions without publishing the private assessment source repository, credentials, test accounts or operational secrets.
+SecureView runs in production at **[https://secureview.tech](https://secureview.tech)**. This public repository is a curated portfolio mirror: it documents the current product, architecture, testing evidence, screenshots, walkthrough videos and my contributions without publishing the private assessment source repository, credentials, test accounts or operational secrets.
 
 ## Current Product State
 
-The current build is beyond the original MVP and includes the following:
+The current build goes well beyond the original MVP scope and includes the following:
 
 - **Six client-side AEAD choices per file:** AES-128-GCM, AES-192-GCM, AES-256-GCM, AES-256-GCM-SIV, ChaCha20-Poly1305 and XChaCha20-Poly1305. AES-256-GCM remains the default.
 - **RSA-OAEP key wrapping:** the file data-encryption key is re-wrapped in the browser to each authorised recipient's public key.
@@ -39,7 +39,7 @@ The current build is beyond the original MVP and includes the following:
 
 ## Latest Walkthrough
 
-The old screenshots previously stored in this portfolio repository were removed because they showed an earlier interface. The six images below are the **current walkthrough captured after the October UI redesign**, using fabricated demo data.
+The old screenshots previously stored in this portfolio repository were removed because they showed an earlier interface. The six images below are the **current walkthrough captured after the October UI redesign**, using fabricated sample data.
 
 | 1. Choose a file | 2. Encrypt in the browser |
 |---|---|
@@ -53,15 +53,15 @@ The old screenshots previously stored in this portfolio repository were removed 
 |---|---|
 | ![Recipient unlocks locally](https://secureview.tech/walkthrough/05-unlock.webp) | ![Verify and download](https://secureview.tech/walkthrough/06-download.webp) |
 
-### Demo videos
+### Walkthrough videos
 
 The public Help page also uses three freshly re-recorded clips from the redesigned interface:
 
-- **[How SecureView works](https://secureview.tech/videos/how-it-works.mp4)** — product flow and trust boundary.
-- **[Encrypt and upload](https://secureview.tech/videos/encrypt-upload.mp4)** — local encryption, sealing and upload.
-- **[Share and open](https://secureview.tech/videos/share-open.mp4)** — recipient verification, sharing and local unlock.
+- **[How SecureView works](https://secureview.tech/videos/how-it-works.mp4)**: product flow and trust boundary.
+- **[Encrypt and upload](https://secureview.tech/videos/encrypt-upload.mp4)**: local encryption, sealing and upload.
+- **[Share and open](https://secureview.tech/videos/share-open.mp4)**: recipient verification, sharing and local unlock.
 
-See **[docs/DEMO.md](docs/DEMO.md)** for posters, Chinese walkthrough images and the media manifest.
+See **[docs/MEDIA.md](docs/MEDIA.md)** for posters, Chinese walkthrough images and the media manifest.
 
 ## Architecture
 
@@ -104,7 +104,7 @@ The Vue frontend owns file-content cryptography and account-key handling. The Fa
 - Upload quotas, free-space guards and rate limits reduce storage-abuse risk.
 - Because the server stores ciphertext, it cannot inspect shared files for malware; risky executable or macro-capable files therefore trigger recipient warnings.
 
-SecureView is an **academic prototype**, not a claim of independently audited production security. The public security summary and residual-risk notes are in **[docs/SECURITY_OVERVIEW.md](docs/SECURITY_OVERVIEW.md)**.
+SecureView is a **university team project** running in production; its security has **not been independently audited**. The public security summary and residual-risk notes are in **[docs/SECURITY_OVERVIEW.md](docs/SECURITY_OVERVIEW.md)**.
 
 ## Testing and Verification
 
@@ -147,7 +147,7 @@ As of **6 October 2026**, I authored **137 of the project's 158 merged pull requ
 - Built the load/capacity tool and ran the staging capacity study.
 - Diagnosed and fixed the 100-user database-pool failure and two MySQL concurrency deadlocks, with regression coverage.
 - Built CI quality gates, the MySQL 8.4 release gate, live end-to-end testing, concurrency/fault-injection coverage and Playwright browser tests.
-- Built the isolated tamper drill and live tamper demonstration.
+- Built the isolated and live ciphertext tamper tests.
 - Added responsive browser checks, layout audits and the later site-wide text audit.
 - Ran OWASP ZAP, pip-audit and npm audit and fixed the security-header findings.
 
@@ -169,11 +169,11 @@ As of **6 October 2026**, I authored **137 of the project's 158 merged pull requ
 
 ## Public Documentation
 
-- **[CHANGELOG.md](CHANGELOG.md)** — curated public milestone history.
-- **[docs/README.md](docs/README.md)** — documentation and evidence index.
-- **[docs/DEMO.md](docs/DEMO.md)** — current screenshots, Chinese screenshots and videos.
-- **[docs/SECURITY_OVERVIEW.md](docs/SECURITY_OVERVIEW.md)** — public security model and limitations.
-- **[docs/TESTING_AND_PERFORMANCE.md](docs/TESTING_AND_PERFORMANCE.md)** — test strategy and measured performance.
+- **[CHANGELOG.md](CHANGELOG.md)**: curated public milestone history.
+- **[docs/README.md](docs/README.md)**: documentation and evidence index.
+- **[docs/MEDIA.md](docs/MEDIA.md)**: current screenshots, Chinese screenshots and videos.
+- **[docs/SECURITY_OVERVIEW.md](docs/SECURITY_OVERVIEW.md)**: public security model and limitations.
+- **[docs/TESTING_AND_PERFORMANCE.md](docs/TESTING_AND_PERFORMANCE.md)**: test strategy and measured performance.
 
 ## Live Site
 

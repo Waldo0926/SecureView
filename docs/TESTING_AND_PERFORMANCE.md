@@ -53,7 +53,7 @@ Dedicated tests target:
 
 The concurrency suite found real MySQL deadlocks that were reproduced, fixed and retained as regression tests.
 
-## Capacity study — 3–4 October 2026
+## Capacity study: 3–4 October 2026
 
 The custom load tool performs encryption/decryption using the same cryptographic envelope model as the browser.
 
