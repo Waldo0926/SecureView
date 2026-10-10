@@ -6,7 +6,7 @@
 
 [![在线站点](https://img.shields.io/badge/在线站点-secureview.tech-2563eb?style=for-the-badge&logo=googlechrome&logoColor=white)](https://secureview.tech)
 [![API 文档](https://img.shields.io/badge/API-Swagger_UI-85ea2d?style=for-the-badge&logo=swagger&logoColor=black)](https://secureview.tech/docs)
-[![状态](https://img.shields.io/badge/状态-Active_FYP-16a34a?style=for-the-badge)](#当前项目状态)
+[![状态](https://img.shields.io/badge/状态-已上线运行-16a34a?style=for-the-badge)](#当前项目状态)
 [![源码](https://img.shields.io/badge/源码-评估期间私有-475569?style=for-the-badge)](#源码开放情况)
 [![许可证](https://img.shields.io/badge/许可证-保留所有权利-dc2626?style=for-the-badge)](LICENSE)
 
@@ -18,7 +18,7 @@ SecureView 会在**浏览器内、上传之前**完成文件加密，服务器�
 
 服务器保存公钥、加密后的私钥包、密文和被包裹的文件密钥。用户的加密口令、明文私钥、明文文件密钥和明文文件不会进入API请求或数据库记录。
 
-浏览器端MVP已经在 **[https://secureview.tech](https://secureview.tech)** 端到端运行。这个公开仓库是经过筛选的作品集镜像：展示当前产品、架构、测试证据、截图、演示媒体和我的贡献，但不公开私有评估仓库、凭据、测试账号或内部运维秘密。
+SecureView 已经在 **[https://secureview.tech](https://secureview.tech)** 正式运行。这个公开仓库是经过筛选的作品集镜像：展示当前产品、架构、测试证据、截图、操作视频和我的贡献，但不公开私有评估仓库、凭据、测试账号或内部运维秘密。
 
 ## 当前项目状态
 
@@ -39,7 +39,7 @@ SecureView 会在**浏览器内、上传之前**完成文件加密，服务器�
 
 ## 最新图文流程
 
-公开仓库原来的4张截图来自旧版界面，已经移除。下面6张是**2026年10月界面改版完成后重新拍摄**的最新版图文流程，使用虚构演示数据。
+公开仓库原来的4张截图来自旧版界面，已经移除。下面6张是**2026年10月界面改版完成后重新拍摄**的最新版图文流程，使用虚构的示例数据。
 
 | 1. 选择文件 | 2. 浏览器内加密 |
 |---|---|
@@ -53,15 +53,15 @@ SecureView 会在**浏览器内、上传之前**完成文件加密，服务器�
 |---|---|
 | ![接收者本地解锁](https://secureview.tech/walkthrough/05-unlock-zh.webp) | ![验证并下载](https://secureview.tech/walkthrough/06-download-zh.webp) |
 
-### 演示视频
+### 操作视频
 
 Help页面使用了3段按新版界面重新录制的视频：
 
-- **[SecureView工作流程](https://secureview.tech/videos/how-it-works.mp4)**——整体流程与信任边界。
-- **[加密并上传](https://secureview.tech/videos/encrypt-upload.mp4)**——本地加密、封存和上传。
-- **[共享并打开](https://secureview.tech/videos/share-open.mp4)**——确认接收者、共享与本地解锁。
+- **[SecureView工作流程](https://secureview.tech/videos/how-it-works.mp4)**：整体流程与信任边界。
+- **[加密并上传](https://secureview.tech/videos/encrypt-upload.mp4)**：本地加密、封存和上传。
+- **[共享并打开](https://secureview.tech/videos/share-open.mp4)**：确认接收者、共享与本地解锁。
 
-更多海报、英文/中文图文流程和媒体清单见 **[docs/DEMO.md](docs/DEMO.md)**。
+更多海报、英文/中文图文流程和媒体清单见 **[docs/MEDIA.md](docs/MEDIA.md)**。
 
 ## 架构
 
@@ -104,7 +104,7 @@ Vue前端负责文件内容加密和账户密钥处理。FastAPI后端负责认�
 - 存储配额、磁盘空间保护和限流用于降低上传滥用风险。
 - 由于服务器只保存密文，无法对共享内容进行恶意软件扫描，因此对可执行文件和可含宏文件会向接收者给出风险提醒。
 
-SecureView是**学术原型**，并不等同于经过独立安全审计的生产系统。公开版安全模型与剩余风险见 **[docs/SECURITY_OVERVIEW.md](docs/SECURITY_OVERVIEW.md)**。
+SecureView 是已经上线运行的**大学团队项目**，但安全性**没有经过独立审计**。公开版安全模型与剩余风险见 **[docs/SECURITY_OVERVIEW.md](docs/SECURITY_OVERVIEW.md)**。
 
 ## 测试与验证
 
@@ -147,7 +147,7 @@ SecureView是**学术原型**，并不等同于经过独立安全审计的生产
 - 编写负载/容量测试工具并完成预发布容量测试。
 - 定位并修复100用户数据库连接池故障，以及两个MySQL并发死锁，并补充回归测试。
 - 建立CI质量闸门、MySQL 8.4发布闸门、线上端到端测试、并发/故障注入覆盖和Playwright浏览器测试。
-- 搭建隔离篡改演练与线上篡改演示。
+- 搭建隔离环境和线上环境的密文篡改测试。
 - 增加手机宽度浏览器检查、布局审计，以及后续全站文字审计。
 - 运行OWASP ZAP、pip-audit、npm audit并修复安全响应头问题。
 
@@ -169,11 +169,11 @@ SecureView是**学术原型**，并不等同于经过独立安全审计的生产
 
 ## 公开文档
 
-- **[CHANGELOG.md](CHANGELOG.md)**——筛选后的公开项目里程碑。
-- **[docs/README.md](docs/README.md)**——文档与证据索引。
-- **[docs/DEMO.md](docs/DEMO.md)**——最新中英文截图与视频。
-- **[docs/SECURITY_OVERVIEW.md](docs/SECURITY_OVERVIEW.md)**——公开安全模型与局限。
-- **[docs/TESTING_AND_PERFORMANCE.md](docs/TESTING_AND_PERFORMANCE.md)**——测试策略与性能数据。
+- **[CHANGELOG.md](CHANGELOG.md)**：筛选后的公开项目里程碑。
+- **[docs/README.md](docs/README.md)**：文档与证据索引。
+- **[docs/MEDIA.md](docs/MEDIA.md)**：最新中英文截图与视频。
+- **[docs/SECURITY_OVERVIEW.md](docs/SECURITY_OVERVIEW.md)**：公开安全模型与局限。
+- **[docs/TESTING_AND_PERFORMANCE.md](docs/TESTING_AND_PERFORMANCE.md)**：测试策略与性能数据。
 
 ## 在线站点
 

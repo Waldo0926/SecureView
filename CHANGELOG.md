@@ -68,4 +68,4 @@ This is a **curated public changelog** for the SecureView portfolio repository. 
 
 ---
 
-For current screenshots and videos, see [docs/DEMO.md](docs/DEMO.md). For the measured evidence behind the testing claims, see [docs/TESTING_AND_PERFORMANCE.md](docs/TESTING_AND_PERFORMANCE.md).
+For current screenshots and videos, see [docs/MEDIA.md](docs/MEDIA.md). For the measured evidence behind the testing claims, see [docs/TESTING_AND_PERFORMANCE.md](docs/TESTING_AND_PERFORMANCE.md).
