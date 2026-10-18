@@ -2,18 +2,26 @@
 
 This document summarises the evidence used by the public portfolio. Raw logs, environment-specific server metrics and private test-account material remain in the assessment repository.
 
+## Latest CI results
+
+From the CI run on 13 October 2026:
+
+| Job | Result | Coverage |
+|---|---|---|
+| Backend unit tests | 718 passed | 81.8% |
+| Full backend suite on MySQL 8.4 | 786 passed, 0 skipped | 86.6% |
+| Frontend tests | 899 passed | 77.4% statements |
+| Frontend live suites (real backend) | 977 passed, 0 skipped | 79.7% statements |
+| Playwright browser tests | 57 | |
+
 ## Test layers
 
 ### Backend
 
-- 503 backend unit tests on the current main branch.
-- 633 tests in the full backend/MySQL suite.
-- Approximately 85% branch coverage in the full MySQL-backed run.
 - Contract, authorisation, repository, migration and transaction-boundary tests.
 
 ### Frontend
 
-- 810 frontend tests on the current main branch.
 - Type checking and production build verification.
 - English / Simplified Chinese translation checks.
 - Layout and text audits across desktop, tablet and phone widths.
@@ -68,25 +76,34 @@ The custom load tool performs encryption/decryption using the same cryptographic
 
 ### 100-user bottleneck and fix
 
-At 100 concurrent users, 65% to 80% of uploads could fail while CPU averaged about 3%. The result showed that CPU was not the bottleneck.
+At 100 concurrent users, 65% to 78% of uploads failed with HTTP 500 while CPU averaged about 3%. The result showed that CPU was not the bottleneck.
 
 The failure was traced to an interaction between database connections and worker threads during uploads. After the fix:
 
-- failed uploads: about 80% to 0%;
+- failed uploads: up to 78% to 0%;
 - throughput: 0.33 to 56 operations/second;
 - staging re-run: 102/102 uploads completed successfully.
+
+## Re-run through the public URL: 9 October 2026
+
+The load test was run again against the public site instead of staging:
+
+- 18,256 operations.
+- 7,444 downloads verified with 0 integrity failures.
+- No HTTP 500 at 100 concurrent users.
+- Some uploads got HTTP 429 from Nginx because the whole test came from one address and hit the per-address limit. That limit was later sized for a venue network behind one NAT.
 
 ## Security scanning
 
 ### OWASP ZAP
 
-Recorded baseline result:
+The first baseline scan reported 0 FAIL and flagged missing security headers on static responses. After those headers were added in Nginx, the result was:
 
 - 0 FAIL
-- 8 WARN
-- 59 PASS
+- 5 WARN
+- 62 PASS
 
-The scan identified missing security headers on static responses; those headers were then added in Nginx.
+A re-scan on 12 October 2026 gave the same result.
 
 ### Dependency audits
 

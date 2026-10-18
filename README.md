@@ -15,7 +15,7 @@
 ![MySQL](https://img.shields.io/badge/MySQL-8.4-4479a1?logo=mysql&logoColor=white)
 ![Tests](https://img.shields.io/badge/Tests-pytest,_Vitest,_Playwright-2ead33?logo=playwright&logoColor=white)
 
-**Public portfolio snapshot synced: 6 October 2026.**
+**Synced with the team repository on 18 October 2026.**
 
 ## Overview
 
@@ -31,14 +31,14 @@ SecureView runs in production at **[https://secureview.tech](https://secureview.
 |---|---|
 | **What** | Web app for storing and sharing files that are encrypted in the browser |
 | **Team** | Four students, Final Year Project (FIT3161/FIT3162, team MCS21) |
-| **My part** | Authored 137 of the team's 158 merged PRs: testing and CI, security features, deployment and operations |
+| **My part** | Authored 182 of the team's 203 merged PRs: testing and CI, security features, deployment and operations |
 | **Stack** | Vue 3 + TypeScript, FastAPI, MySQL 8.4, Nginx, Docker, GitHub Actions |
-| **Tests** | 503 backend unit tests, 810 frontend tests, 633-test MySQL suite at about 85% branch coverage |
-| **Load test** | 22,264 operations with 0 integrity failures; fixed a 100-user bug that took upload failures from 80% to 0% |
+| **Tests** | 718 backend unit tests, 786-test MySQL suite at 86.6% coverage, 899 frontend tests, 977 live frontend tests, 57 browser tests |
+| **Load test** | 22,264 operations with 0 integrity failures; fixed a 100-user bug that took upload failures from up to 78% to 0% |
 
 ## My Contributions
 
-As of **6 October 2026**, I authored **137 of the project's 158 merged pull requests** (**145 authored PRs** in total) and opened **29 issues**.
+As of **17 October 2026**, I authored **182 of the project's 203 merged pull requests** (**190 authored PRs** in total) and opened **29 issues**. Every PR merged after 6 October is mine.
 
 ### Testing and quality engineering
 
@@ -55,6 +55,9 @@ As of **6 October 2026**, I authored **137 of the project's 158 merged pull requ
 - Built the Security Agent and its later evidence/de-duplication improvements.
 - Built the integrity/recovery pipeline, daily checks and single-file restore view.
 - Implemented upload-abuse limits, risky-file warnings and recipient key-fingerprint confirmation.
+- Added encryption-passphrase change and a passphrase strength check, made AES-192-GCM work in every browser and added server-side checks of the cipher test vectors.
+- Hardened accounts: registration no longer reveals whether an email exists, account deletion is throttled, an admin reset forces a new password on the server, and the last admin account is protected.
+- Added audit-log filters (event type, result, date, keyword) with paging, and made every download and share ask for the passphrase again.
 - Built the Help Assistant, bilingual interface, admin console, account details/login-password reset, file details, encrypted preview and visible encryption-step evidence.
 - Implemented earlier core browser flows including download/decryption, recipient re-wrapping, private-key-file unlock, idle relock, session renewal and account deletion.
 
@@ -72,9 +75,10 @@ As of **6 October 2026**, I authored **137 of the project's 158 merged pull requ
 - **Controlled sharing and revocation:** share by exact username or email, confirm the recipient's key fingerprint, and revoke future server-mediated access.
 - **File details and encryption evidence:** exact plaintext/ciphertext sizes, ciphertext SHA-256, access list, activity history, encrypted download, ciphertext preview and measured encryption steps.
 - **Integrity protection:** SHA-256 check before download, authenticated-encryption tag checks, daily integrity sweeps and an admin Integrity view.
-- **Tamper-evident audit history:** security-sensitive events are hash chained and administrators can verify the chain.
+- **Tamper-evident audit history:** security-sensitive events are hash chained and administrators can verify the chain. The log can be filtered by event type, result, date and keyword.
 - **Role-based administration:** USER, ADMIN and RECOVERY_OFFICER roles, with governed recovery workflows.
 - **Security Agent:** a read-only, rule-based admin view that ranks security findings with evidence and recommended actions.
+- **Passphrase safety:** users can change their encryption passphrase, weak or account-derived passphrases are rejected, and the passphrase is asked again on every download and share.
 - **Account administration:** admins can view account metadata and reset a user's **login password** to a one-time temporary password. Users then set their own login password in Settings. The encryption passphrase stays on the client and admins never see it.
 - **Help Assistant:** a local browser assistant for how-to and product questions. It answers from curated project content, uses no language model and does not send the question anywhere.
 - **English / Simplified Chinese UI:** language switching across the public site and the signed-in workspace.
@@ -98,7 +102,7 @@ Captured after the October 2026 UI redesign, using made-up sample data.
 
 ### Videos
 
-The public Help page uses three clips recorded on the current interface:
+The public Help page uses three 1080p clips recorded on the current interface:
 
 - **[How SecureView works](https://secureview.tech/videos/how-it-works.mp4)**: product flow and trust boundary.
 - **[Encrypt and upload](https://secureview.tech/videos/encrypt-upload.mp4)**: local encryption, sealing and upload.
@@ -153,8 +157,12 @@ SecureView is a **university team project** running in production. Its security 
 
 ### Automated suites
 
-- **503 backend unit tests** and **810 frontend tests** pass on the current main branch.
-- The full backend suite against real MySQL 8.4 has **633 tests** at about **85% branch coverage**.
+Results from the CI run on 13 October 2026:
+
+- **718 backend unit tests** pass (81.8% coverage).
+- The full backend suite against real MySQL 8.4 has **786 tests**, 0 skipped, at **86.6% coverage**.
+- **899 frontend tests** pass, and the frontend live suites against a real backend run **977 tests** with 0 skipped.
+- **57 Playwright browser tests**.
 - Live end-to-end tests cover verification-code registration, session refresh and replay rejection, account unlock, all six ciphers, upload/download, sharing/revocation, audit visibility, role denial and account deletion.
 - Playwright drives the real browser through registration, upload, unlock, download, byte-for-byte comparison, sharing, revocation and logout.
 - Concurrency tests target session limits, audit chaining, key rewraps, duplicate shares and recovery races.
@@ -169,12 +177,14 @@ The staging capacity study on 3 and 4 October 2026 recorded:
 - **5,094 verified downloads** with **0 integrity failures**.
 - Common file types from 1 MB to **500 MB** round-tripped byte-exact.
 - No server errors up to **50 concurrent users** in the measured run.
-- A 100-user run exposed a database-pool/thread-pool interaction: failed uploads reached about 80% while CPU averaged only 3%.
-- After the fix, the 100-user failure rate dropped from **80% to 0%**, throughput went from **0.33 to 56 operations/second**, and the staging re-run completed **102/102 uploads**.
+- A 100-user run exposed a database-pool/thread-pool interaction: 65% to 78% of uploads failed with HTTP 500 while CPU averaged only 3%.
+- After the fix, the 100-user failure rate dropped to **0%**, throughput went from **0.33 to 56 operations/second**, and the staging re-run completed **102/102 uploads**.
+
+A second run through the public URL on 9 October 2026 recorded **18,256 operations** and **7,444 verified downloads** with **0 integrity failures**, and no HTTP 500 at 100 users. Some uploads in that run got HTTP 429 because the whole test came from one address and hit the per-address limit.
 
 ### Security checks
 
-- OWASP ZAP baseline scan: **0 FAIL, 8 WARN, 59 PASS**. The missing static security headers it reported were then fixed in Nginx.
+- OWASP ZAP baseline scan: **0 FAIL**. After the missing static security headers were added in Nginx, the result is **0 FAIL, 5 WARN, 62 PASS**, and a re-scan on 12 October 2026 gave the same result.
 - pip-audit and npm audit: no findings in production dependencies at the recorded scan.
 - Tamper drills modify stored ciphertext and check that download is refused. Changing the recorded SHA-256 as well is still rejected by authenticated encryption.
 - Encrypted off-server backups are checked with a clean-host restore drill.

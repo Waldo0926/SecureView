@@ -48,6 +48,6 @@ Shows recipient confirmation, sharing and local unlock/decryption.
 
 ## Media provenance
 
-The current walkthrough and Help videos were re-recorded on **5 October 2026** after the major interface redesign. The source capture process used documented local test accounts and fabricated content; no production user data is intentionally included.
+The walkthrough was re-recorded on **5 October 2026** after the interface redesign. The Help videos were recorded on the new interface at the same time and re-made at 1080p later in October. The source capture process used documented local test accounts and fabricated content; no production user data is intentionally included.
 
 Desktop and mobile variants exist in the application bundle. The README uses the desktop set for readability, while the live website automatically chooses an appropriate layout.
