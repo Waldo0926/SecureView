@@ -1,6 +1,6 @@
 # SecureView Screenshots and Videos
 
-The media below reflects the **current October 2026 UI redesign**. The earlier screenshots once stored in this public repository were removed because they showed an older interface.
+The media below shows the interface after the **October 2026 UI redesign**.
 
 All walkthrough images use fabricated sample data. The media is served by the same public static bundle used by the live SecureView site.
 

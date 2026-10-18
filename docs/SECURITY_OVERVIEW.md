@@ -84,7 +84,7 @@ Recorded public evidence includes:
 
 ## Important limitations
 
-SecureView is an academic prototype and does not claim:
+SecureView is a university team project running in production. It has not been independently audited and does not claim:
 
 - independent professional penetration testing;
 - protection against a compromised user's browser or operating system while plaintext is open;
@@ -92,4 +92,4 @@ SecureView is an academic prototype and does not claim:
 - server-side malware scanning of encrypted content;
 - zero-knowledge protection for all metadata.
 
-The detailed internal threat model tracks additional findings and mitigations, but operational details and assessment-only material are intentionally omitted from this public mirror.
+The detailed internal threat model tracks additional findings and mitigations, but operational details and assessment-only material are left out of this public repository.

@@ -1,6 +1,6 @@
 # SecureView Public Changelog
 
-This is a **curated public changelog** for the SecureView portfolio repository. The private team repository keeps the exhaustive engineering record; this file contains milestones that are useful to a public reader without exposing assessment-only source, test accounts or operational secrets.
+This is a **curated public changelog** for the SecureView portfolio repository. The private team repository keeps the full engineering record. This file lists the main milestones and leaves out assessment-only source, test accounts and operational secrets.
 
 ## 2026-10-06
 
@@ -10,8 +10,8 @@ This is a **curated public changelog** for the SecureView portfolio repository. 
 - Added administrator login-password reset with a one-time temporary password, session revocation and audit logging. Encryption passphrases and file keys remain outside administrator access.
 - Added a Settings flow for users to change their own login password.
 - Synced the public portfolio README with the current feature set, testing numbers, October performance study and latest UI.
-- Replaced the old portfolio screenshot section with the freshly recorded October walkthrough and demo media.
-- Added a public documentation index, demo/media guide, security overview, and testing/performance summary.
+- Replaced the old portfolio screenshot section with the October walkthrough and Help videos.
+- Added a public documentation index, media guide, security overview, and testing/performance summary.
 
 ## 2026-10-05
 
@@ -45,7 +45,7 @@ This is a **curated public changelog** for the SecureView portfolio repository. 
 - Ran long mixed-load tests and measured up to 50 concurrent users without server errors.
 - Used the load tool to expose concurrency-only MySQL deadlocks and added regression tests after fixing them.
 
-## Late September – early October 2026
+## Late September to early October 2026
 
 ### Security, cryptography and product hardening
 

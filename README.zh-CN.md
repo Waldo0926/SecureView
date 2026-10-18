@@ -6,137 +6,35 @@
 
 [![在线站点](https://img.shields.io/badge/在线站点-secureview.tech-2563eb?style=for-the-badge&logo=googlechrome&logoColor=white)](https://secureview.tech)
 [![API 文档](https://img.shields.io/badge/API-Swagger_UI-85ea2d?style=for-the-badge&logo=swagger&logoColor=black)](https://secureview.tech/docs)
-[![状态](https://img.shields.io/badge/状态-已上线运行-16a34a?style=for-the-badge)](#当前项目状态)
+[![状态](https://img.shields.io/badge/状态-已上线运行-16a34a?style=for-the-badge)](#功能)
 [![源码](https://img.shields.io/badge/源码-评估期间私有-475569?style=for-the-badge)](#源码开放情况)
 [![许可证](https://img.shields.io/badge/许可证-保留所有权利-dc2626?style=for-the-badge)](LICENSE)
+
+![Vue 3](https://img.shields.io/badge/Vue_3-TypeScript-42b883?logo=vuedotjs&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-Python-009688?logo=fastapi&logoColor=white)
+![MySQL](https://img.shields.io/badge/MySQL-8.4-4479a1?logo=mysql&logoColor=white)
+![Tests](https://img.shields.io/badge/Tests-pytest,_Vitest,_Playwright-2ead33?logo=playwright&logoColor=white)
 
 **公开作品集快照同步于：2026年10月6日。**
 
 ## 项目概览
 
-SecureView 会在**浏览器内、上传之前**完成文件加密，服务器只保存密文和被包裹的密钥材料；授权用户可以进行共享、撤销、下载和访问审计。
+SecureView 在**浏览器内、上传之前**完成文件加密。服务器只保存密文和被包裹的密钥材料，授权用户可以共享、撤销、下载文件并查看访问记录。
 
-服务器保存公钥、加密后的私钥包、密文和被包裹的文件密钥。用户的加密口令、明文私钥、明文文件密钥和明文文件不会进入API请求或数据库记录。
+服务器保存公钥、加密后的私钥包、密文和被包裹的文件密钥。用户的加密口令、明文私钥、明文文件密钥和明文文件不会出现在API请求或数据库记录里。
 
-SecureView 已经在 **[https://secureview.tech](https://secureview.tech)** 正式运行。这个公开仓库是经过筛选的作品集镜像：展示当前产品、架构、测试证据、截图、操作视频和我的贡献，但不公开私有评估仓库、凭据、测试账号或内部运维秘密。
+SecureView 已经在 **[https://secureview.tech](https://secureview.tech)** 正式运行（请输入完整的 https:// 地址）。这个仓库是项目的作品集页面，介绍产品、架构、测试结果、截图、视频和我的贡献，不包含团队源码、凭据、测试账号和服务器细节。
 
-## 当前项目状态
+### 一览
 
-现在的版本已经明显超过最初MVP范围，包括：
-
-- **六种浏览器端AEAD算法**：AES-128-GCM、AES-192-GCM、AES-256-GCM、AES-256-GCM-SIV、ChaCha20-Poly1305和XChaCha20-Poly1305；默认仍为AES-256-GCM。
-- **RSA-OAEP密钥包裹**：文件DEK在浏览器内重新包裹给每个授权接收者的公钥。
-- **受控共享与撤销**：可按精确用户名或邮箱共享，共享前确认接收者密钥指纹，并可撤销后续经服务器的访问。
-- **文件详情与加密证据**：显示明文/密文精确大小、密文SHA-256、访问者、操作记录，并支持下载密文、密文预览和真实加密步骤耗时。
-- **完整性保护**：下载前SHA-256校验、AEAD认证标签校验、每日完整性巡检和管理员Integrity视图。
-- **防篡改审计记录**：安全敏感事件采用哈希链，管理员可以验证完整链。
-- **基于角色的管理**：USER、ADMIN和RECOVERY_OFFICER，并带有受管控的恢复流程。
-- **Security Agent**：只读、基于规则的安全管理视图，把审计、完整性和恢复事件整理成带证据和建议操作的发现。
-- **账户管理**：管理员可以查看账户元数据，并把用户的**登录密码**重置为一次性临时密码；用户随后可在Settings中改成自己的登录密码。加密口令始终只在客户端，管理员看不到。
-- **Help Assistant**：在浏览器本地根据项目内容回答使用方法和产品问题，不调用大模型，也不会把问题发到远程服务。
-- **中英双语**：公开页面和登录后的工作区均支持English / 简体中文切换。
-- **新版界面**：当前“Sealed”视觉系统包括登录后侧边栏、居中页面标题、上传Seal Receipt、响应式My Files详情侧栏、手机布局，以及重新设计的公开页面。
-
-## 最新图文流程
-
-公开仓库原来的4张截图来自旧版界面，已经移除。下面6张是**2026年10月界面改版完成后重新拍摄**的最新版图文流程，使用虚构的示例数据。
-
-| 1. 选择文件 | 2. 浏览器内加密 |
+| | |
 |---|---|
-| ![选择文件](https://secureview.tech/walkthrough/01-select-zh.webp) | ![浏览器内加密](https://secureview.tech/walkthrough/02-encrypt-zh.webp) |
-
-| 3. 管理加密文件 | 4. 分享给已确认的接收者 |
-|---|---|
-| ![管理加密文件](https://secureview.tech/walkthrough/03-file-zh.webp) | ![分享给已确认的接收者](https://secureview.tech/walkthrough/04-recipient-zh.webp) |
-
-| 5. 接收者本地解锁 | 6. 验证并下载 |
-|---|---|
-| ![接收者本地解锁](https://secureview.tech/walkthrough/05-unlock-zh.webp) | ![验证并下载](https://secureview.tech/walkthrough/06-download-zh.webp) |
-
-### 操作视频
-
-Help页面使用了3段按新版界面重新录制的视频：
-
-- **[SecureView工作流程](https://secureview.tech/videos/how-it-works.mp4)**：整体流程与信任边界。
-- **[加密并上传](https://secureview.tech/videos/encrypt-upload.mp4)**：本地加密、封存和上传。
-- **[共享并打开](https://secureview.tech/videos/share-open.mp4)**：确认接收者、共享与本地解锁。
-
-更多海报、英文/中文图文流程和媒体清单见 **[docs/MEDIA.md](docs/MEDIA.md)**。
-
-## 架构
-
-~~~mermaid
-flowchart LR
-U[用户浏览器<br/>WebCrypto + AEAD] -->|HTTPS| N[Nginx]
-N --> F[Vue 3 + TypeScript SPA]
-N -->|/api/v1| A[FastAPI]
-A --> D[(MySQL 8.4)]
-A --> S[(加密对象存储)]
-A --> L[审计链、RBAC、完整性与Security Agent]
-classDef client fill:#dbeafe,stroke:#2563eb,color:#0f172a
-classDef server fill:#ede9fe,stroke:#7c3aed,color:#0f172a
-classDef data fill:#dcfce7,stroke:#16a34a,color:#0f172a
-class U,F client
-class N,A,L server
-class D,S data
-~~~
-
-Vue前端负责文件内容加密和账户密钥处理。FastAPI后端负责认证授权、请求校验、业务事务、审计追加，以及保存密文和元数据，但不解密用户文件。
-
-| 领域 | 技术 |
-|---|---|
-| 前端 | Vue 3、TypeScript、Vite、WebCrypto |
-| 后端 | FastAPI、Python、Pydantic、SQLAlchemy、Alembic |
-| 数据库 | MySQL 8.4 |
-| 密码学 | AES-GCM、AES-GCM-SIV、(X)ChaCha20-Poly1305、RSA-OAEP、Argon2id、SHA-256 |
-| 测试 | pytest、Vitest、Playwright、自研压测工具、OWASP ZAP、pip-audit、npm audit |
-| 基础设施 | Linux、Nginx、Docker、systemd、GitHub Actions自托管runner |
-
-## 安全设计
-
-- 每个文件在浏览器中生成独立的DEK。
-- 认证加密同时保护文件机密性和完整性。
-- RSA-OAEP（SHA-256）分别为所有者和每个授权接收者包裹文件密钥。
-- 登录密码在服务器端使用Argon2id单向哈希。
-- 独立的加密口令只在浏览器中用于派生密钥加密材料，不发送到服务器。
-- 如果忘记加密口令，可使用用户自行保存的私钥文件恢复访问。
-- 审计记录使用哈希链，事后修改历史可以被发现。
-- 存储配额、磁盘空间保护和限流用于降低上传滥用风险。
-- 由于服务器只保存密文，无法对共享内容进行恶意软件扫描，因此对可执行文件和可含宏文件会向接收者给出风险提醒。
-
-SecureView 是已经上线运行的**大学团队项目**，但安全性**没有经过独立审计**。公开版安全模型与剩余风险见 **[docs/SECURITY_OVERVIEW.md](docs/SECURITY_OVERVIEW.md)**。
-
-## 测试与验证
-
-### 自动化测试
-
-- 当前main分支 **503个后端单元测试**、**810个前端测试**通过。
-- 连接真实MySQL 8.4的完整后端套件共有 **633个测试**，分支覆盖率约 **85%**。
-- 线上端到端测试覆盖：邮件验证码注册、会话续期与重放拒绝、账户解锁、六种算法、上传/下载、共享/撤销、审计可见性、越权拒绝和账户删除。
-- Playwright通过真实浏览器跑注册、上传、解锁、下载、逐字节比对、共享、撤销和退出。
-- 并发测试覆盖会话上限、审计哈希链、密钥重新包裹、重复共享和恢复竞态。
-- 故障注入覆盖数据库提交失败、对象存储失败、损坏信封和伪造签名。
-- 密码学向量会与OpenSSL、libsodium和RFC8452参考结果逐字节比对。
-
-### 容量与性能
-
-2026年10月3–4日的预发布环境测试记录：
-
-- **22,264次操作**。
-- **5,094次下载验证**，**0次完整性失败**。
-- 常见文件类型从1MB到 **500MB** 均逐字节往返一致。
-- 实测 **50个并发用户**以内无服务器错误。
-- 100用户测试暴露出数据库连接池与线程池之间的相互等待：CPU平均只有3%，上传失败率却一度达到约80%。
-- 修复后，100用户上传失败率从 **80%降到0%**，吞吐从 **0.33次/秒提升到56次/秒**，预发布复测 **102/102次上传**成功。
-
-### 安全检查
-
-- OWASP ZAP基线扫描：**0 FAIL、8 WARN、59 PASS**；其发现的静态资源安全响应头问题随后已在Nginx修复。
-- pip-audit和npm audit：记录时生产依赖未发现问题。
-- 篡改演练会直接修改存储密文，并确认下载被拒绝；即使同时修改记录的SHA-256，AEAD认证仍会拒绝。
-- 加密异地备份通过干净主机恢复演练验证。
-
-更多内容见 **[docs/TESTING_AND_PERFORMANCE.md](docs/TESTING_AND_PERFORMANCE.md)**。
+| **项目** | 文件在浏览器内加密后再存储和共享的Web应用 |
+| **团队** | 四人毕业设计（FIT3161/FIT3162，MCS21组） |
+| **我的部分** | 团队合并的158个PR中137个由我提交：测试与CI、安全功能、部署与运维 |
+| **技术栈** | Vue 3 + TypeScript、FastAPI、MySQL 8.4、Nginx、Docker、GitHub Actions |
+| **测试** | 503个后端单元测试、810个前端测试，连接MySQL的633个测试分支覆盖率约85% |
+| **压测** | 22,264次操作，0次完整性失败；修复100用户并发问题，上传失败率从80%降到0% |
 
 ## 我的贡献
 
@@ -167,24 +65,138 @@ SecureView 是已经上线运行的**大学团队项目**，但安全性**没有
 - 加入加密异地备份、干净主机恢复验证、数据一致性检查、监控和脱敏运维证据。
 - 维护中英双语架构、安全、威胁模型、测试、性能和发布文档，以及期末展示证据。
 
+## 功能
+
+- **六种浏览器端AEAD算法**：AES-128-GCM、AES-192-GCM、AES-256-GCM、AES-256-GCM-SIV、ChaCha20-Poly1305和XChaCha20-Poly1305，默认AES-256-GCM。
+- **RSA-OAEP密钥包裹**：浏览器把文件DEK重新包裹给每个授权接收者的公钥。
+- **受控共享与撤销**：按精确用户名或邮箱共享，共享前确认接收者密钥指纹，并可撤销之后经服务器的访问。
+- **文件详情与加密证据**：显示明文/密文精确大小、密文SHA-256、访问者、操作记录，支持下载密文、密文预览和真实加密步骤耗时。
+- **完整性保护**：下载前SHA-256校验、AEAD认证标签校验、每日完整性巡检和管理员Integrity视图。
+- **防篡改审计记录**：安全敏感事件采用哈希链，管理员可以验证整条链。
+- **基于角色的管理**：USER、ADMIN和RECOVERY_OFFICER三种角色，并带有受管控的恢复流程。
+- **Security Agent**：只读、基于规则的管理视图，把安全发现按优先级排好，并附上证据和建议操作。
+- **账户管理**：管理员可以查看账户元数据，并把用户的**登录密码**重置为一次性临时密码，用户之后在Settings里改成自己的密码。加密口令只在客户端，管理员看不到。
+- **Help Assistant**：在浏览器本地根据项目内容回答使用和产品问题，不用大模型，也不会把问题发到别的服务。
+- **中英双语**：公开页面和登录后的工作区都能切换English / 简体中文。
+- **新版界面**：“Sealed”设计，包括登录后侧边栏、居中页面标题、上传Seal Receipt、响应式My Files详情侧栏、手机布局和重新设计的公开页面。
+
+## 图文流程
+
+2026年10月界面改版后拍摄，使用虚构的示例数据。
+
+| 1. 选择文件 | 2. 浏览器内加密 |
+|---|---|
+| ![选择文件](https://secureview.tech/walkthrough/01-select-zh.webp) | ![浏览器内加密](https://secureview.tech/walkthrough/02-encrypt-zh.webp) |
+
+| 3. 管理加密文件 | 4. 分享给已确认的接收者 |
+|---|---|
+| ![管理加密文件](https://secureview.tech/walkthrough/03-file-zh.webp) | ![分享给已确认的接收者](https://secureview.tech/walkthrough/04-recipient-zh.webp) |
+
+| 5. 接收者本地解锁 | 6. 验证并下载 |
+|---|---|
+| ![接收者本地解锁](https://secureview.tech/walkthrough/05-unlock-zh.webp) | ![验证并下载](https://secureview.tech/walkthrough/06-download-zh.webp) |
+
+### 操作视频
+
+Help页面用了3段在新版界面上录制的视频：
+
+- **[SecureView工作流程](https://secureview.tech/videos/how-it-works.mp4)**：整体流程与信任边界。
+- **[加密并上传](https://secureview.tech/videos/encrypt-upload.mp4)**：本地加密、封存和上传。
+- **[共享并打开](https://secureview.tech/videos/share-open.mp4)**：确认接收者、共享与本地解锁。
+
+视频封面和英文图文流程见 **[docs/MEDIA.md](docs/MEDIA.md)**。
+
+## 架构
+
+~~~mermaid
+flowchart LR
+U[用户浏览器<br/>WebCrypto + AEAD] -->|HTTPS| N[Nginx]
+N --> F[Vue 3 + TypeScript SPA]
+N -->|/api/v1| A[FastAPI]
+A --> D[(MySQL 8.4)]
+A --> S[(加密对象存储)]
+A --> L[审计链、RBAC、完整性与Security Agent]
+classDef client fill:#dbeafe,stroke:#2563eb,color:#0f172a
+classDef server fill:#ede9fe,stroke:#7c3aed,color:#0f172a
+classDef data fill:#dcfce7,stroke:#16a34a,color:#0f172a
+class U,F client
+class N,A,L server
+class D,S data
+~~~
+
+Vue前端负责文件加密和账户密钥。FastAPI后端负责认证授权、请求校验、业务事务、追加审计记录，以及保存密文和元数据，从不解密用户文件。
+
+| 领域 | 技术 |
+|---|---|
+| 前端 | Vue 3、TypeScript、Vite、WebCrypto |
+| 后端 | FastAPI、Python、Pydantic、SQLAlchemy、Alembic |
+| 数据库 | MySQL 8.4 |
+| 密码学 | AES-GCM、AES-GCM-SIV、(X)ChaCha20-Poly1305、RSA-OAEP、Argon2id、SHA-256 |
+| 测试 | pytest、Vitest、Playwright、自研压测工具、OWASP ZAP、pip-audit、npm audit |
+| 基础设施 | Linux、Nginx、Docker、systemd、GitHub Actions自托管runner |
+
+## 安全设计
+
+- 每个文件在浏览器中生成独立的DEK。
+- 认证加密同时保护文件机密性和完整性。
+- RSA-OAEP（SHA-256）分别为所有者和每个授权接收者包裹文件密钥。
+- 登录密码在服务器端用Argon2id哈希。
+- 独立的加密口令只在浏览器中用于派生密钥加密材料，不发送到服务器。
+- 忘记加密口令时，可以用自己保存的私钥文件恢复访问。
+- 审计记录使用哈希链，事后修改历史能被发现。
+- 存储配额、磁盘空间保护和限流用来减少上传滥用。
+- 服务器只有密文，没法对共享文件做恶意软件扫描，所以接收可执行文件或可含宏文件时会提示风险。
+
+SecureView 是已经上线运行的**大学团队项目**，安全性**没有经过独立审计**。公开版安全模型和已知局限见 **[docs/SECURITY_OVERVIEW.md](docs/SECURITY_OVERVIEW.md)**。
+
+## 测试与验证
+
+### 自动化测试
+
+- 当前main分支 **503个后端单元测试**、**810个前端测试**通过。
+- 连接真实MySQL 8.4的完整后端套件共 **633个测试**，分支覆盖率约 **85%**。
+- 线上端到端测试覆盖：邮件验证码注册、会话续期与重放拒绝、账户解锁、六种算法、上传/下载、共享/撤销、审计可见性、越权拒绝和账户删除。
+- Playwright通过真实浏览器跑注册、上传、解锁、下载、逐字节比对、共享、撤销和退出。
+- 并发测试覆盖会话上限、审计哈希链、密钥重新包裹、重复共享和恢复竞态。
+- 故障注入覆盖数据库提交失败、对象存储失败、损坏信封和伪造签名。
+- 密码学向量与OpenSSL、libsodium和RFC 8452参考结果比对。
+
+### 容量与性能
+
+2026年10月3日和4日的预发布环境测试记录：
+
+- **22,264次操作**。
+- **5,094次下载验证**，**0次完整性失败**。
+- 常见文件类型从1MB到 **500MB** 都逐字节往返一致。
+- 实测 **50个并发用户**以内无服务器错误。
+- 100用户测试暴露出数据库连接池和线程池互相等待：CPU平均只有3%，上传失败率却达到约80%。
+- 修复后，100用户上传失败率从 **80%降到0%**，吞吐从 **0.33次/秒提升到56次/秒**，预发布复测 **102/102次上传**成功。
+
+### 安全检查
+
+- OWASP ZAP基线扫描：**0 FAIL、8 WARN、59 PASS**，扫描发现的静态资源安全响应头问题之后已在Nginx修复。
+- pip-audit和npm audit：记录时生产依赖没有发现问题。
+- 篡改演练直接修改存储的密文，确认下载被拒绝；就算同时改掉记录的SHA-256，AEAD认证也会拒绝。
+- 加密异地备份用干净主机恢复演练验证。
+
+更多内容见 **[docs/TESTING_AND_PERFORMANCE.md](docs/TESTING_AND_PERFORMANCE.md)**。
+
 ## 公开文档
 
-- **[CHANGELOG.md](CHANGELOG.md)**：筛选后的公开项目里程碑。
-- **[docs/README.md](docs/README.md)**：文档与证据索引。
-- **[docs/MEDIA.md](docs/MEDIA.md)**：最新中英文截图与视频。
+- **[CHANGELOG.md](CHANGELOG.md)**：公开里程碑记录。
+- **[docs/README.md](docs/README.md)**：文档索引。
+- **[docs/MEDIA.md](docs/MEDIA.md)**：中英文截图和视频。
 - **[docs/SECURITY_OVERVIEW.md](docs/SECURITY_OVERVIEW.md)**：公开安全模型与局限。
 - **[docs/TESTING_AND_PERFORMANCE.md](docs/TESTING_AND_PERFORMANCE.md)**：测试策略与性能数据。
 
-## 在线站点
-
-访问 **[https://secureview.tech](https://secureview.tech)**，请保留https://前缀。
-
 ## 源码开放情况
 
-主实现仓库在大学团队项目评估期间保持私有。本作品集仓库刻意不包含私有源码、凭据、测试账号秘密、私钥材料和内部部署细节。
+主实现仓库在大学团队项目评估期间保持私有。这个仓库不包含团队源码、凭据、测试账号秘密、私钥材料和内部部署细节。
 
-在学校和团队要求允许后，可能会进一步公开实现材料。
+如果学校和团队允许，之后可能会公开更多实现材料。
 
 ---
 
 **项目：** SecureView · **学校：** Monash University Malaysia · **课程：** FIT3161 / FIT3162 · **团队：** MCS21 · **团队人数：** 四人
+
+**我的另一个线上项目：** [Monash Hub](https://github.com/Waldo0926/monash-hub)，地址 [monashhub.secureview.tech](https://monashhub.secureview.tech)，是我个人做的项目，放在子域名上，不属于 SecureView 团队的工作。

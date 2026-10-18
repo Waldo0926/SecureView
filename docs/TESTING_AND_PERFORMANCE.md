@@ -53,7 +53,7 @@ Dedicated tests target:
 
 The concurrency suite found real MySQL deadlocks that were reproduced, fixed and retained as regression tests.
 
-## Capacity study: 3–4 October 2026
+## Capacity study: 3 and 4 October 2026
 
 The custom load tool performs encryption/decryption using the same cryptographic envelope model as the browser.
 
@@ -68,15 +68,13 @@ The custom load tool performs encryption/decryption using the same cryptographic
 
 ### 100-user bottleneck and fix
 
-At 100 concurrent users, 65–80% of uploads could fail while CPU averaged about 3%. The result showed that CPU was not the bottleneck.
+At 100 concurrent users, 65% to 80% of uploads could fail while CPU averaged about 3%. The result showed that CPU was not the bottleneck.
 
 The failure was traced to an interaction between database connections and worker threads during uploads. After the fix:
 
-- failed uploads: about 80% → 0%;
-- throughput: 0.33 → 56 operations/second;
+- failed uploads: about 80% to 0%;
+- throughput: 0.33 to 56 operations/second;
 - staging re-run: 102/102 uploads completed successfully.
-
-This is useful evidence because the load test did more than produce a headline number: it found an architectural bottleneck and verified the repair.
 
 ## Security scanning
 
