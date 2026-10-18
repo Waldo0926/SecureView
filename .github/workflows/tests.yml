@@ -1,0 +1,325 @@
+name: Tests
+
+# The team repository runs its suites on self-hosted runners (ci/ci.yml). This
+# repository is public, where GitHub-hosted runners are free, so the same
+# backend, frontend and MySQL release-gate jobs run here on every push and
+# pull request. The live end-to-end job and the tamper drill are not included:
+# the test accounts they need were removed before publishing.
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: backend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Cache uv download cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('backend/requirements.txt', 'backend/requirements-dev.txt') }}
+          restore-keys: |
+            uv-${{ runner.os }}-
+
+      - name: Create virtual environment
+        run: uv venv .venv
+
+      - name: Install dependencies
+        run: uv pip install --python .venv/bin/python -r requirements.txt -r requirements-dev.txt
+
+      # Looks every pinned and resolved dependency up in the PyPA advisory database. A new
+      # advisory fails the build until the package is upgraded or the finding is triaged.
+      - name: Audit Python dependencies for known vulnerabilities
+        run: |
+          uv pip install --python .venv/bin/python pip-audit
+          .venv/bin/pip-audit -r requirements.txt
+
+      - name: Ruff format check
+        run: .venv/bin/ruff format --check .
+
+      - name: Ruff lint
+        run: .venv/bin/ruff check .
+
+      # Deselects the "integration" marker: those tests need a real MySQL instance and run in
+      # the mysql-gate job, which also fails if any of them report as skipped. Coverage is
+      # gated by `fail_under` in pyproject.toml.
+      - name: Backend tests (non-MySQL) with coverage
+        env:
+          SECRET_KEY: ci-backend-test-secret-key-at-least-32-chars
+          APP_ENV: test
+        run: >-
+          .venv/bin/python -m pytest -m "not integration"
+          --cov --cov-report=term --cov-report=xml:${{ runner.temp }}/reports/backend/coverage.xml
+          --junitxml=${{ runner.temp }}/reports/backend/junit.xml
+
+      # Reports are published only after a scan confirms they carry no keys, tokens,
+      # non-example addresses, or fixture plaintext.
+      - name: Check test reports before publishing
+        id: hygiene
+        if: always()
+        run: .venv/bin/python scripts/check_report_hygiene.py ${{ runner.temp }}/reports/backend
+
+      - name: Upload test reports
+        if: always() && steps.hygiene.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: ${{ runner.temp }}/reports/backend
+          retention-days: 14
+
+  frontend:
+    name: frontend
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Fails on any high or critical advisory in the full tree, dev tooling included.
+      - name: Audit npm dependencies for known vulnerabilities
+        run: npm audit --audit-level=high
+
+      # The live-backend suites skip themselves here, as they do on a laptop without the
+      # stack running. Coverage thresholds live in vite.config.ts.
+      - name: Unit tests with coverage
+        run: >-
+          npm run test:coverage --
+          --reporter=default --reporter=junit
+          --outputFile.junit=${{ runner.temp }}/reports/frontend/junit.xml
+          --coverage.reportsDirectory=${{ runner.temp }}/reports/frontend/coverage
+
+      - name: Check test reports before publishing
+        id: hygiene
+        if: always()
+        run: python3 ../backend/scripts/check_report_hygiene.py ${{ runner.temp }}/reports/frontend
+
+      - name: Upload test reports
+        if: always() && steps.hygiene.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-test-reports
+          path: ${{ runner.temp }}/reports/frontend
+          retention-days: 14
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Production build
+        run: npm run build
+
+  mysql-gate:
+    name: mysql-gate
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ci-disposable-root-password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Cache uv download cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('backend/requirements.txt', 'backend/requirements-dev.txt') }}
+          restore-keys: |
+            uv-${{ runner.os }}-
+
+      - name: Create virtual environment
+        run: uv venv .venv
+
+      - name: Install dependencies
+        run: uv pip install --python .venv/bin/python -r requirements.txt -r requirements-dev.txt
+
+      - name: Install MySQL client tools
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends mysql-client
+
+      # The root password is fixed because this MySQL instance exists only for the job and is
+      # destroyed with it. The runtime and backup account passwords are generated per run.
+      # All three are masked, so a stray `echo` or a tool's error message cannot leak them
+      # into the job log.
+      - name: Generate and mask disposable credentials
+        id: creds
+        run: |
+          root_password="ci-disposable-root-password"
+          runtime_password="$(openssl rand -hex 24)"
+          backup_password="$(openssl rand -hex 24)"
+          echo "::add-mask::${root_password}"
+          echo "::add-mask::${runtime_password}"
+          echo "::add-mask::${backup_password}"
+          {
+            echo "root_password=${root_password}"
+            echo "runtime_password=${runtime_password}"
+            echo "backup_password=${backup_password}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Wait for MySQL and extract its CA certificate
+        env:
+          ROOT_PASSWORD: ${{ steps.creds.outputs.root_password }}
+        run: |
+          for _ in $(seq 1 30); do
+            mysqladmin ping --host=127.0.0.1 --port=3306 --user=root --password="$ROOT_PASSWORD" --silent && break
+            sleep 2
+          done
+          container_id="$(docker ps --filter "ancestor=mysql:8.4" --format '{{.ID}}' | head -n1)"
+          docker cp "${container_id}:/var/lib/mysql/ca.pem" "${RUNNER_TEMP}/mysql-ca.pem"
+
+      - name: Create the disposable release-gate database
+        env:
+          ROOT_PASSWORD: ${{ steps.creds.outputs.root_password }}
+        run: |
+          mysql --host=127.0.0.1 --port=3306 --user=root --password="$ROOT_PASSWORD" \
+            --execute "CREATE DATABASE IF NOT EXISTS fyp_secure_file_platform_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+      - name: Run every migration 0001 through head, then alembic current/check
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: "3306"
+          DB_USER: root
+          DB_PASSWORD: ${{ steps.creds.outputs.root_password }}
+          DB_NAME: fyp_secure_file_platform_test
+          SECRET_KEY: ci-mysql-gate-test-secret-key-at-least-32-chars
+          APP_ENV: test
+        run: |
+          .venv/bin/python -m alembic upgrade head
+          .venv/bin/python -m alembic current
+          .venv/bin/python -m alembic check
+
+      - name: Verify the connection actually negotiated TLS
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: "3306"
+          DB_USER: root
+          DB_PASSWORD: ${{ steps.creds.outputs.root_password }}
+          DB_NAME: fyp_secure_file_platform_test
+          DB_SSL_CA: ${{ runner.temp }}/mysql-ca.pem
+        run: .venv/bin/python scripts/verify_mysql_tls.py
+
+      - name: Verify runtime and backup account grant boundaries
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: "3306"
+          DB_NAME: fyp_secure_file_platform_test
+          ADMIN_DB_USER: root
+          ADMIN_DB_PASSWORD: ${{ steps.creds.outputs.root_password }}
+          RUNTIME_DB_USER: fyp_gate_runtime_user
+          RUNTIME_DB_PASSWORD: ${{ steps.creds.outputs.runtime_password }}
+          RUNTIME_DB_HOST: "%"
+          BACKUP_DB_USER: fyp_gate_backup_user
+          BACKUP_DB_PASSWORD: ${{ steps.creds.outputs.backup_password }}
+          BACKUP_DB_HOST: "%"
+        run: .venv/bin/python scripts/check_runtime_grants.py
+
+      # -rs plus check_no_skips.py turns a silently-skipped integration suite (the default
+      # when AUTH_TEST_DATABASE_URL is unset) into a hard failure instead of a quiet pass.
+      # The whole suite runs here, unit tests included, so the coverage floor measures
+      # everything the backend is tested by.
+      - name: Run the full backend suite against MySQL, with coverage
+        env:
+          AUTH_TEST_DATABASE_URL: mysql+pymysql://root:${{ steps.creds.outputs.root_password }}@127.0.0.1:3306/fyp_secure_file_platform_test
+          SECRET_KEY: ci-mysql-gate-test-secret-key-at-least-32-chars
+          APP_ENV: test
+        run: >-
+          .venv/bin/python -m pytest -rs
+          --cov --cov-fail-under=82 --cov-report=term
+          --cov-report=xml:${{ runner.temp }}/reports/mysql-gate/coverage.xml
+          --junitxml=${{ runner.temp }}/reports/mysql-gate/junit.xml
+
+      - name: Fail if any test was skipped
+        run: .venv/bin/python scripts/check_no_skips.py ${{ runner.temp }}/reports/mysql-gate/junit.xml
+
+      - name: Check test reports before publishing
+        id: hygiene
+        if: always()
+        run: .venv/bin/python scripts/check_report_hygiene.py ${{ runner.temp }}/reports/mysql-gate
+
+      - name: Upload test reports
+        if: always() && steps.hygiene.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mysql-gate-test-reports
+          path: ${{ runner.temp }}/reports/mysql-gate
+          retention-days: 14
+
+      - name: Non-empty refusal, resume, lock races, checksummed restore, rollback, partial DDL
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: "3306"
+          ADMIN_DB_USER: root
+          ADMIN_DB_PASSWORD: ${{ steps.creds.outputs.root_password }}
+          SECRET_KEY: ci-mysql-gate-test-secret-key-at-least-32-chars
+          APP_ENV: test
+          PYTHON_BIN: ${{ github.workspace }}/backend/.venv/bin/python
+        run: bash scripts/mysql_release_gate.sh
+
+      # Generates a throwaway backup keypair and backup account inside the job; neither the
+      # private key nor any password is ever echoed. The report holds only ids, counts, and
+      # timings.
+      - name: Encrypted backup, clean restore, and refusal drill
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: "3306"
+          ADMIN_DB_USER: root
+          ADMIN_DB_PASSWORD: ${{ steps.creds.outputs.root_password }}
+          SECRET_KEY: ci-mysql-gate-test-secret-key-at-least-32-chars
+          APP_ENV: test
+          DRILL_REPORT: ${{ runner.temp }}/restore-drill-report.json
+        run: bash scripts/backup_restore_drill.sh
+
+      - name: Keep the restore drill report
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: restore-drill-report
+          path: ${{ runner.temp }}/restore-drill-report.json
+          retention-days: 90

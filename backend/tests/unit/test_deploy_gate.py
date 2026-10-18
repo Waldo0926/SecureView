@@ -13,6 +13,10 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 WORKFLOW = REPO_ROOT / ".github/workflows/ci.yml"
+if not WORKFLOW.exists():
+    # The public snapshot keeps the team workflow under ci/ (it runs on the team's own
+    # runners); the checks below are about that file, not about the workflow that runs here.
+    WORKFLOW = REPO_ROOT / "ci/ci.yml"
 SCRIPT = REPO_ROOT / "deployment/server/mcs21-auto-deploy"
 
 
