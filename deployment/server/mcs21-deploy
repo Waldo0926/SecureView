@@ -1,0 +1,491 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+umask 027
+
+deploy_user="mcs21-deploy"
+deploy_group="mcs21-deploy"
+mirror="/var/lib/mcs21-deploy/repository.git"
+app_root="/opt/mcs21"
+releases_dir="$app_root/releases"
+current_link="$app_root/current"
+previous_link="$app_root/previous"
+env_file="/etc/fyp-secure-file-platform/backend.env"
+mysql_container="mcs21-mysql"
+mysql_account_host="172.29.21.1"
+backup_root="/var/backups/mcs21-deploy"
+# Pre-deploy sets kept as fast rollback points. Each one also archives every ciphertext object,
+# so an unpruned directory grew to 178 sets and 76 GB by 2026-10-08. Off-server copies are the
+# job of mcs21-offsite-backup, not of these.
+keep_backups="${MCS21_KEEP_DEPLOY_BACKUPS:-10}"
+audit_dir="/var/log/mcs21-deploy"
+audit_log="$audit_dir/audit.log"
+lock_file="/run/lock/mcs21-deploy.lock"
+health_url="http://127.0.0.1/health/live"
+frontend_url="http://127.0.0.1/"
+public_host="<server-ip>"
+
+action="${1:-status}"
+requested_ref="${2:-}"
+caller="${SUDO_USER:-$(id -un)}"
+
+timestamp() {
+  date -u +%Y-%m-%dT%H:%M:%SZ
+}
+
+audit() {
+  local result="$1"
+  local detail="${2:-}"
+  install -d -m 0750 -o root -g mcs21-deployers "$audit_dir"
+  touch "$audit_log"
+  chown root:mcs21-deployers "$audit_log"
+  chmod 0640 "$audit_log"
+  printf '%s caller=%q action=%q result=%q %s\n' \
+    "$(timestamp)" "$caller" "$action" "$result" "$detail" >>"$audit_log"
+  logger -t mcs21-deploy -- "caller=$caller action=$action result=$result $detail"
+}
+
+die() {
+  printf 'ERROR: %s\n' "$*" >&2
+  audit failed "message=$(printf '%q' "$*")"
+  exit 1
+}
+
+on_error() {
+  local exit_code="$1"
+  local line_number="$2"
+  trap - ERR
+  audit failed "exit=$exit_code line=$line_number"
+  exit "$exit_code"
+}
+
+trap 'on_error "$?" "$LINENO"' ERR
+
+as_deploy() {
+  runuser -u "$deploy_user" -- "$@"
+}
+
+git_mirror() {
+  as_deploy git --git-dir="$mirror" "$@"
+}
+
+require_root() {
+  [[ "$(id -u)" -eq 0 ]] || {
+    printf 'Run with sudo: sudo mcs21-deploy %s\n' "$action" >&2
+    exit 2
+  }
+}
+
+show_help() {
+  cat <<'EOF'
+MCS21 deployment entrypoint
+
+Usage:
+  sudo mcs21-deploy status
+  sudo mcs21-deploy history
+  sudo mcs21-deploy all [main|commit-sha]
+  sudo mcs21-deploy backend [main|commit-sha]
+  sudo mcs21-deploy frontend [main|commit-sha]
+  sudo mcs21-deploy database
+  sudo mcs21-deploy rollback
+
+Notes:
+  - all deploys one complete frontend/backend release from GitHub main.
+  - backend and frontend are compatibility aliases for the same complete release.
+  - database creates a backup and runs read-only production SQL verification.
+  - production schema changes require a separately reviewed administrator SQL change.
+  - rollback changes the code release only; it never changes the database schema.
+EOF
+}
+
+show_status() {
+  local current_target="none"
+  local current_sha="unknown"
+  local remote_sha="unknown"
+  [[ -L "$current_link" ]] && current_target="$(readlink -f "$current_link")"
+  [[ -f "$current_target/.mcs21-release" ]] && current_sha="$(<"$current_target/.mcs21-release")"
+  [[ "$current_sha" == "unknown" && -d "$current_target/.git" ]] && \
+    current_sha="$(git -c safe.directory="$current_target" -C "$current_target" rev-parse HEAD 2>/dev/null || true)"
+  [[ -d "$mirror" ]] && remote_sha="$(git_mirror rev-parse refs/heads/main 2>/dev/null || true)"
+
+  printf 'current_target=%s\n' "$current_target"
+  printf 'current_commit=%s\n' "${current_sha:-unknown}"
+  printf 'mirrored_main=%s\n' "${remote_sha:-unknown}"
+  printf 'backend=%s\n' "$(systemctl is-active fyp-backend 2>/dev/null || true)"
+  printf 'mysql=%s\n' "$(docker inspect --format '{{if .State.Health}}{{.State.Health.Status}}{{else}}{{.State.Status}}{{end}}' "$mysql_container" 2>/dev/null || echo missing)"
+  printf 'mysql_tls_required=%s\n' "$(docker exec "$mysql_container" sh -c 'export MYSQL_PWD=$(cat /run/secrets/mysql-root-password); mysql --user=root --protocol=socket --batch --skip-column-names --execute="SELECT @@require_secure_transport"' 2>/dev/null || echo unknown)"
+  printf 'nginx=%s\n' "$(systemctl is-active nginx 2>/dev/null || true)"
+  if curl -fsS --header "Host: $public_host" --max-time 5 "$health_url" \
+    | grep -q '"status":"ok"'; then
+    printf 'health=ok\n'
+  else
+    printf 'health=failed\n'
+  fi
+}
+
+fetch_main() {
+  git_mirror fetch --prune origin '+refs/heads/main:refs/heads/main'
+}
+
+resolve_target() {
+  local main_sha target
+  main_sha="$(git_mirror rev-parse refs/heads/main)"
+  if [[ -z "$requested_ref" || "$requested_ref" == "main" ]]; then
+    target="$main_sha"
+  else
+    [[ "$requested_ref" =~ ^[0-9a-fA-F]{7,40}$ ]] || die "commit must be a 7-40 character hexadecimal SHA"
+    target="$(git_mirror rev-parse "${requested_ref}^{commit}" 2>/dev/null)" || die "unknown commit: $requested_ref"
+    git_mirror merge-base --is-ancestor "$target" "$main_sha" || die "commit is not reachable from origin/main"
+  fi
+  printf '%s\n' "$target"
+}
+
+# One pip connection can trickle for many minutes (2026-10-05: ~29 kB/s on a 4.7 MB wheel the
+# same host fetched in under a second), and pip's own --timeout only fires when no bytes arrive
+# at all. So each attempt also has a wall-clock limit, and a stalled attempt is started again
+# before the deploy is given up. A normal install takes under a minute.
+pip_attempts="${MCS21_PIP_ATTEMPTS:-3}"
+pip_attempt_seconds="${MCS21_PIP_ATTEMPT_SECONDS:-240}"
+pip_retry_pause="${MCS21_PIP_RETRY_PAUSE:-10}"
+
+install_backend_requirements() {
+  local build_dir="$1" attempt
+  for ((attempt = 1; attempt <= pip_attempts; attempt++)); do
+    if as_deploy timeout --kill-after=15s "${pip_attempt_seconds}s" \
+      "$build_dir/backend/.venv/bin/python" -m pip install \
+      --disable-pip-version-check --no-cache-dir --timeout 30 --retries 5 \
+      -r "$build_dir/backend/requirements.txt" >&2; then
+      return 0
+    fi
+    printf 'pip install attempt %s of %s failed or ran past %ss\n' \
+      "$attempt" "$pip_attempts" "$pip_attempt_seconds" >&2
+    (( attempt < pip_attempts )) && sleep "$pip_retry_pause"
+  done
+  return 1
+}
+
+build_release() {
+  local sha="$1"
+  local release="$releases_dir/$sha"
+  local build_dir
+  if [[ -d "$release" ]]; then
+    [[ -f "$release/.mcs21-release" ]] || die "existing release is missing its identity file: $release"
+    [[ "$(<"$release/.mcs21-release")" == "$sha" ]] || die "existing release identity does not match $sha"
+    chmod -R a+rX "$release"
+    printf '%s\n' "$release"
+    return
+  fi
+
+  build_dir="$(mktemp -d "$releases_dir/.build-${sha:0:12}.XXXXXX")"
+  chown "$deploy_user:$deploy_group" "$build_dir"
+  chmod 0755 "$build_dir"
+  if ! runuser -u "$deploy_user" -- bash -c \
+    'set -o pipefail; git --git-dir="$1" archive "$2" | tar -x -C "$3"' \
+    bash "$mirror" "$sha" "$build_dir"; then
+    rm -rf "$build_dir"
+    die "could not export commit $sha"
+  fi
+  chmod -R a+rX "$build_dir"
+
+  printf '%s\n' "$sha" >"$build_dir/.mcs21-release"
+  chown "$deploy_user:$deploy_group" "$build_dir/.mcs21-release"
+  chmod 0644 "$build_dir/.mcs21-release"
+
+  as_deploy python3 -m venv "$build_dir/backend/.venv"
+  if ! install_backend_requirements "$build_dir"; then
+    rm -rf "$build_dir"
+    die "could not install the backend requirements for $sha"
+  fi
+  as_deploy "$build_dir/backend/.venv/bin/python" -m compileall -q "$build_dir/backend/app"
+
+  docker run --rm \
+    --user "$(id -u "$deploy_user"):$(id -g "$deploy_user")" \
+    --env HOME=/tmp \
+    --env NPM_CONFIG_CACHE=/tmp/npm-cache \
+    --env VITE_API_BASE_URL=/api/v1 \
+    --volume "$build_dir/frontend:/app" \
+    --workdir /app \
+    node:22-bookworm-slim \
+    sh -lc 'npm ci && npm run build' >&2
+
+  [[ -f "$build_dir/frontend/dist/index.html" ]] || {
+    rm -rf "$build_dir"
+    die "frontend build did not create dist/index.html"
+  }
+  # The virtual environment is created after the initial archive permission pass. Make the
+  # completed immutable release readable/executable by the unprivileged app and Nginx users.
+  chmod -R a+rX "$build_dir"
+  mv "$build_dir" "$release"
+  printf '%s\n' "$release"
+}
+
+backup_database() {
+  local sha="$1"
+  local stamp backup_dir
+  stamp="$(date -u +%Y%m%dT%H%M%SZ)"
+  backup_dir="$backup_root/$stamp-${sha:0:12}"
+  install -d -m 0700 -o root -g root "$backup_dir"
+  docker exec "$mysql_container" sh -c \
+    'export MYSQL_PWD=$(cat /run/secrets/mysql-root-password); exec mysqldump --user=root --protocol=socket --single-transaction --quick --hex-blob --routines --events --triggers --no-tablespaces --skip-lock-tables fyp_secure_file_platform' \
+    | gzip -9 >"$backup_dir/mysql-application.sql.gz"
+  gzip -t "$backup_dir/mysql-application.sql.gz"
+  if [[ -d /var/lib/fyp-secure-file-platform ]]; then
+    tar -C /var/lib -czf "$backup_dir/application-files.tar.gz" fyp-secure-file-platform
+  fi
+  sha256sum "$backup_dir"/*.gz >"$backup_dir/SHA256SUMS"
+  chmod -R go-rwx "$backup_dir"
+  printf '%s\n' "$backup_dir"
+}
+
+prune_backups() {
+  # Keep the newest $keep_backups pre-deploy sets and delete older ones. Only directories whose
+  # names this script itself creates (UTC stamp + 12-hex SHA) are considered, so nothing else
+  # under $backup_root is ever touched. Names sort by time, so the order needs no stat calls.
+  local keep="$1"
+  [[ "$keep" =~ ^[0-9]+$ ]] && ((keep >= 3)) || die "refusing to keep fewer than 3 deploy backups"
+  local -a sets=()
+  local entry
+  while IFS= read -r entry; do
+    sets+=("$entry")
+  done < <(find "$backup_root" -mindepth 1 -maxdepth 1 -type d \
+    -regextype posix-extended -regex '.*/[0-9]{8}T[0-9]{6}Z-[0-9a-f]{12}' -printf '%f\n' | sort -r)
+  local removed=0 index
+  for ((index = keep; index < ${#sets[@]}; index++)); do
+    rm -rf -- "${backup_root:?}/${sets[index]}"
+    removed=$((removed + 1))
+  done
+  printf '%s\n' "$removed"
+}
+
+verify_database() {
+  local release="$1"
+  local protected_sql verify_log tls_state
+  [[ -f "$release/database/mysql/03-verify.sql" ]] || \
+    die "release does not contain database/mysql/03-verify.sql"
+  install -d -m 0750 -o root -g mcs21-deployers "$audit_dir"
+  protected_sql="$(mktemp "$audit_dir/.mysql-verify.XXXXXX.sql")"
+  verify_log="$audit_dir/mysql-verify-$(date -u +%Y%m%dT%H%M%SZ).log"
+  sed "s/'localhost'/'$mysql_account_host'/g" \
+    "$release/database/mysql/03-verify.sql" >"$protected_sql"
+  chmod 0600 "$protected_sql"
+  if ! docker exec -i "$mysql_container" sh -c \
+    'export MYSQL_PWD=$(cat /run/secrets/mysql-root-password); exec mysql --user=root --protocol=socket --batch' \
+    <"$protected_sql" >"$verify_log"; then
+    rm -f "$protected_sql"
+    die "tracked MySQL verification SQL failed"
+  fi
+  rm -f "$protected_sql"
+  chown root:mcs21-deployers "$verify_log"
+  chmod 0640 "$verify_log"
+  if grep -Eq '(^|[[:space:]])(REVIEW|MISSING|UNEXPECTED)([[:space:]]|$)' "$verify_log"; then
+    die "tracked MySQL verification found a schema, account, or grant deviation; see $verify_log"
+  fi
+  tls_state="$(docker exec "$mysql_container" sh -c \
+    'export MYSQL_PWD=$(cat /run/secrets/mysql-root-password); mysql --user=root --protocol=socket --batch --skip-column-names --execute="SELECT @@require_secure_transport"')"
+  [[ "$tls_state" == 1 ]] || die "MySQL does not require secure transport"
+  printf 'Database verification: %s\n' "$verify_log"
+}
+
+preflight_backend() {
+  local release="$1"
+  local sha="$2"
+  local unit="mcs21-preflight-${sha:0:12}-$$"
+  local ready=0
+  systemd-run --quiet --collect --unit="$unit" \
+    --uid=fypapp --gid=fypapp \
+    --property="EnvironmentFile=$env_file" \
+    --property="WorkingDirectory=$release/backend" \
+    --setenv=PYTHONDONTWRITEBYTECODE=1 \
+    --setenv=PYTHONUNBUFFERED=1 \
+    -- "$release/backend/.venv/bin/python" -m uvicorn app.main:app \
+    --host 127.0.0.1 --port 18080 --proxy-headers --forwarded-allow-ips=127.0.0.1
+  for _ in $(seq 1 30); do
+    if curl -fsS --max-time 2 http://127.0.0.1:18080/health/live >/dev/null; then
+      ready=1
+      break
+    fi
+    sleep 1
+  done
+  systemctl stop "$unit" >/dev/null 2>&1 || true
+  if [[ "$ready" != 1 ]]; then
+    journalctl -u "$unit" --no-pager -n 80 >&2 || true
+    die "preflight backend health check failed"
+  fi
+}
+
+atomic_link() {
+  local target="$1"
+  local link="$2"
+  local temporary="$app_root/.link.$(basename "$link").$$"
+  ln -s "$target" "$temporary"
+  mv -Tf "$temporary" "$link"
+}
+
+verify_live() {
+  for _ in $(seq 1 30); do
+    if systemctl is-active --quiet fyp-backend \
+      && systemctl is-active --quiet nginx \
+      && curl -fsS --header "Host: $public_host" --max-time 3 "$health_url" \
+        | grep -q '"status":"ok"' \
+      && curl -fsS --header "Host: $public_host" --max-time 3 "$frontend_url" \
+        | grep -qi '<!doctype html'; then
+      return 0
+    fi
+    sleep 1
+  done
+  return 1
+}
+
+# Ops units that a release may install by itself. The list is closed on purpose: a unit placed
+# in /etc/systemd/system runs as whatever user it names, so letting any file in a release become
+# one would turn "a commit that passed CI" into "arbitrary code as root". Each name here must
+# pass the checks below, which pin the account, the program and the absence of root-only hooks.
+ops_units=(mcs21-integrity-sweep mcs21-security-agent)
+systemd_dir="/etc/systemd/system"
+
+ops_unit_acceptable() {
+  local service="$1" timer="$2" name="$3"
+  grep -qx 'User=fypapp' "$service" || return 1
+  grep -qx 'Group=fypapp' "$service" || return 1
+  grep -Eq '^ExecStart=/opt/mcs21/current/backend/\.venv/bin/python scripts/[a-z_]+\.py( |$)' "$service" || return 1
+  # `+` and `!` prefixes run a command with full privileges whatever User= says.
+  ! grep -Eq '^(ExecStart|ExecStartPre|ExecStartPost|ExecStop|ExecStopPost|ExecReload)=[+!]' "$service" || return 1
+  ! grep -Eq '^(User|Group)=root' "$service" || return 1
+  grep -qx "Unit=$name.service" "$timer" || return 1
+}
+
+install_ops_units() {
+  local release="$1" name service timer changed=0 installed=()
+  for name in "${ops_units[@]}"; do
+    service="$release/deployment/server/$name.service"
+    timer="$release/deployment/server/$name.timer"
+    if [[ ! -f "$service" || ! -f "$timer" ]]; then
+      printf 'Ops unit %s is not part of this release; skipped.\n' "$name"
+      continue
+    fi
+    if ! ops_unit_acceptable "$service" "$timer" "$name"; then
+      printf 'Ops unit %s does not meet the install rules; not installed.\n' "$name" >&2
+      return 1
+    fi
+    for unit in "$name.service" "$name.timer"; do
+      if ! cmp -s "$release/deployment/server/$unit" "$systemd_dir/$unit"; then
+        install -m 0644 -o root -g root "$release/deployment/server/$unit" "$systemd_dir/.$unit.new"
+        mv -f "$systemd_dir/.$unit.new" "$systemd_dir/$unit"
+        changed=1
+      fi
+    done
+    systemd-analyze verify "$systemd_dir/$name.service" >&2 || return 1
+    if [[ "$changed" == 1 ]]; then
+      systemctl daemon-reload
+    fi
+    if ! systemctl is-enabled --quiet "$name.timer"; then
+      systemctl enable --now "$name.timer"
+    fi
+    installed+=("$name")
+  done
+  if [[ "${#installed[@]}" -gt 0 ]]; then
+    audit success "ops_units=${installed[*]} changed=$changed"
+  fi
+}
+
+deploy_release() {
+  local sha release old_target backup_dir
+  fetch_main
+  sha="$(resolve_target)"
+  printf 'Preparing commit %s\n' "$sha"
+  release="$(build_release "$sha")"
+  old_target="$(readlink -f "$current_link")"
+  backup_dir="$(backup_database "$sha")"
+  printf 'Database backup: %s\n' "$backup_dir"
+  verify_database "$release"
+  preflight_backend "$release" "$sha"
+  nginx -t
+  atomic_link "$old_target" "$previous_link"
+  atomic_link "$release" "$current_link"
+  systemctl restart fyp-backend
+  systemctl reload nginx
+  if ! verify_live; then
+    printf 'Health check failed; restoring previous code release. Database was not changed by this deployment.\n' >&2
+    atomic_link "$old_target" "$current_link"
+    systemctl restart fyp-backend || true
+    systemctl reload nginx || true
+    verify_live || true
+    die "live health check failed after deploying $sha; code link restored"
+  fi
+  audit success "commit=$sha backup=$backup_dir previous=$(printf '%q' "$old_target")"
+  printf 'Deployment succeeded.\n'
+  # Only after a healthy deployment, so a failing one never shortens the rollback history.
+  local pruned
+  if pruned="$(prune_backups "$keep_backups")"; then
+    printf 'Pruned %s pre-deploy backup set(s); kept the newest %s.\n' "$pruned" "$keep_backups"
+    audit info "message=deploy_backups_pruned removed=$pruned kept=$keep_backups"
+  else
+    printf 'WARNING: pre-deploy backups were not pruned; see above.\n' >&2
+    audit warning "message=deploy_backups_not_pruned"
+  fi
+  # The release is already live and healthy, so a unit that cannot be installed is reported
+  # and audited but never turns a good deployment into a failed one.
+  if ! install_ops_units "$release"; then
+    printf 'WARNING: the ops units were not installed or updated; see above.\n' >&2
+    audit warning "message=ops_units_not_installed"
+  fi
+  show_status
+}
+
+rollback_release() {
+  [[ -L "$previous_link" ]] || die "no previous release is recorded"
+  local current_target previous_target
+  current_target="$(readlink -f "$current_link")"
+  previous_target="$(readlink -f "$previous_link")"
+  [[ -d "$previous_target" ]] || die "previous release is missing: $previous_target"
+  atomic_link "$previous_target" "$current_link"
+  atomic_link "$current_target" "$previous_link"
+  systemctl restart fyp-backend
+  systemctl reload nginx
+  verify_live || die "rollback target failed health checks"
+  audit success "rollback_to=$(printf '%q' "$previous_target")"
+  printf 'Code rollback succeeded. Database schema was not changed.\n'
+  show_status
+}
+
+require_root
+install -d -m 0755 -o root -g root "$app_root"
+install -d -m 0755 -o "$deploy_user" -g "$deploy_group" "$releases_dir"
+
+case "$action" in
+  help|-h|--help)
+    show_help
+    ;;
+  status)
+    show_status
+    ;;
+  history)
+    [[ -f "$audit_log" ]] && tail -n 50 "$audit_log" || printf 'No deployments recorded yet.\n'
+    ;;
+  all|backend|frontend)
+    exec 9>"$lock_file"
+    flock -n 9 || die "another deployment is already running"
+    deploy_release
+    ;;
+  database)
+    exec 9>"$lock_file"
+    flock -n 9 || die "another deployment is already running"
+    current_target="$(readlink -f "$current_link")"
+    current_sha="unknown"
+    [[ -f "$current_target/.mcs21-release" ]] && current_sha="$(<"$current_target/.mcs21-release")"
+    backup_dir="$(backup_database "$current_sha")"
+    verify_database "$current_target"
+    audit success "database_verify commit=$current_sha backup=$backup_dir"
+    printf 'Database backup and verification succeeded. Backup: %s\n' "$backup_dir"
+    ;;
+  rollback)
+    exec 9>"$lock_file"
+    flock -n 9 || die "another deployment is already running"
+    rollback_release
+    ;;
+  *)
+    show_help >&2
+    exit 2
+    ;;
+esac

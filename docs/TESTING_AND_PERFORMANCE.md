@@ -1,6 +1,6 @@
 # SecureView Testing and Performance
 
-This document summarises the evidence used by the public portfolio. Raw logs, environment-specific server metrics and private test-account material remain in the assessment repository.
+This document is a short summary. The full results, raw load-test output, server metrics and scan reports are in [test report](test%20report/README.md), [performance](performance/) and [security](security/).
 
 ## Latest CI results
 

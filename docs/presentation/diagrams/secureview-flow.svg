@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 560" width="1600" height="560" font-family="Inter, Segoe UI, Helvetica, Arial, sans-serif">
+  <rect width="1600" height="560" fill="#ffffff"/>
+  <text x="800" y="58" text-anchor="middle" font-size="34" font-weight="700" fill="#0f172a">How a file travels through SecureView</text>
+  <text x="800" y="96" text-anchor="middle" font-size="20" fill="#475569">Green steps run in a browser. Blue steps run on the server, which only ever holds ciphertext.</text>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="9" markerHeight="9" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#64748b"/>
+    </marker>
+  </defs>
+
+  <!-- 1 Upload -->
+  <g>
+    <rect x="40" y="150" width="260" height="250" rx="18" fill="#ecfdf5" stroke="#10b981" stroke-width="3"/>
+    <circle cx="80" cy="190" r="22" fill="#10b981"/>
+    <text x="80" y="198" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">1</text>
+    <text x="115" y="198" font-size="26" font-weight="700" fill="#065f46">Upload</text>
+    <text x="64" y="250" font-size="19" fill="#0f172a">Alice picks a file.</text>
+    <text x="64" y="280" font-size="19" fill="#0f172a">It is read into her</text>
+    <text x="64" y="310" font-size="19" fill="#0f172a">browser, nothing is</text>
+    <text x="64" y="340" font-size="19" fill="#0f172a">sent yet.</text>
+    <text x="64" y="380" font-size="16" fill="#047857">Alice's browser</text>
+  </g>
+  <line x1="300" y1="275" x2="350" y2="275" stroke="#64748b" stroke-width="4" marker-end="url(#arrow)"/>
+
+  <!-- 2 Encrypt -->
+  <g>
+    <rect x="355" y="150" width="260" height="250" rx="18" fill="#ecfdf5" stroke="#10b981" stroke-width="3"/>
+    <circle cx="395" cy="190" r="22" fill="#10b981"/>
+    <text x="395" y="198" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">2</text>
+    <text x="430" y="198" font-size="26" font-weight="700" fill="#065f46">Encrypt</text>
+    <text x="379" y="250" font-size="19" fill="#0f172a">A fresh file key (DEK)</text>
+    <text x="379" y="280" font-size="19" fill="#0f172a">encrypts it with AES-GCM</text>
+    <text x="379" y="310" font-size="19" fill="#0f172a">or ChaCha20. The DEK is</text>
+    <text x="379" y="340" font-size="19" fill="#0f172a">locked to Alice's key.</text>
+    <text x="379" y="380" font-size="16" fill="#047857">Alice's browser</text>
+  </g>
+  <line x1="615" y1="275" x2="665" y2="275" stroke="#64748b" stroke-width="4" marker-end="url(#arrow)"/>
+
+  <!-- 3 Share -->
+  <g>
+    <rect x="670" y="150" width="260" height="250" rx="18" fill="#ecfdf5" stroke="#10b981" stroke-width="3"/>
+    <circle cx="710" cy="190" r="22" fill="#10b981"/>
+    <text x="710" y="198" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">3</text>
+    <text x="745" y="198" font-size="26" font-weight="700" fill="#065f46">Share</text>
+    <text x="694" y="250" font-size="19" fill="#0f172a">Alice checks Bob's key</text>
+    <text x="694" y="280" font-size="19" fill="#0f172a">fingerprint, then her</text>
+    <text x="694" y="310" font-size="19" fill="#0f172a">browser locks the same</text>
+    <text x="694" y="340" font-size="19" fill="#0f172a">DEK to Bob's public key.</text>
+    <text x="694" y="380" font-size="16" fill="#047857">Alice's browser</text>
+  </g>
+  <line x1="930" y1="275" x2="980" y2="275" stroke="#64748b" stroke-width="4" marker-end="url(#arrow)"/>
+
+  <!-- 4 Authorised download -->
+  <g>
+    <rect x="985" y="150" width="260" height="250" rx="18" fill="#eff6ff" stroke="#3b82f6" stroke-width="3"/>
+    <circle cx="1025" cy="190" r="22" fill="#3b82f6"/>
+    <text x="1025" y="198" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">4</text>
+    <text x="1060" y="198" font-size="26" font-weight="700" fill="#1e40af">Authorise</text>
+    <text x="1009" y="250" font-size="19" fill="#0f172a">The server checks Bob</text>
+    <text x="1009" y="280" font-size="19" fill="#0f172a">has a grant and the stored</text>
+    <text x="1009" y="310" font-size="19" fill="#0f172a">bytes match their hash.</text>
+    <text x="1009" y="340" font-size="19" fill="#b91c1c">Changed? Refused.</text>
+    <text x="1009" y="380" font-size="16" fill="#1d4ed8">Server (ciphertext only)</text>
+  </g>
+  <line x1="1245" y1="275" x2="1295" y2="275" stroke="#64748b" stroke-width="4" marker-end="url(#arrow)"/>
+
+  <!-- 5 Decrypt -->
+  <g>
+    <rect x="1300" y="150" width="260" height="250" rx="18" fill="#ecfdf5" stroke="#10b981" stroke-width="3"/>
+    <circle cx="1340" cy="190" r="22" fill="#10b981"/>
+    <text x="1340" y="198" text-anchor="middle" font-size="22" font-weight="700" fill="#fff">5</text>
+    <text x="1375" y="198" font-size="26" font-weight="700" fill="#065f46">Decrypt</text>
+    <text x="1324" y="250" font-size="19" fill="#0f172a">Bob unlocks his key</text>
+    <text x="1324" y="280" font-size="19" fill="#0f172a">with his own passphrase,</text>
+    <text x="1324" y="310" font-size="19" fill="#0f172a">opens the DEK and gets</text>
+    <text x="1324" y="340" font-size="19" fill="#0f172a">the original file.</text>
+    <text x="1324" y="380" font-size="16" fill="#047857">Bob's browser</text>
+  </g>
+
+  <!-- what the server holds -->
+  <rect x="355" y="440" width="890" height="76" rx="14" fill="#f8fafc" stroke="#cbd5e1" stroke-width="2" stroke-dasharray="8 6"/>
+  <text x="800" y="472" text-anchor="middle" font-size="20" font-weight="600" fill="#0f172a">Stored on the server: ciphertext, the DEK locked to each person's key, and the audit log.</text>
+  <text x="800" y="500" text-anchor="middle" font-size="18" fill="#475569">Never stored: the file, the DEK, a private key or a passphrase.</text>
+</svg>

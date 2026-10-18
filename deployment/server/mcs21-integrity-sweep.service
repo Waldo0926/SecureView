@@ -1,0 +1,39 @@
+# Installed and enabled by `mcs21-deploy` after each healthy release (it is on that script's
+# closed list of ops units, and the script refuses it if it stops running as fypapp or starts
+# anything but scripts/<name>.py). docs/BACKUP_AND_RECOVERY.md section 9 says what a failure of
+# this unit means and how to put a damaged object back.
+#
+# Manual run, as the service account:
+#
+#   sudo systemd-run --pipe --wait --quiet --uid=fypapp --gid=fypapp \
+#     --working-directory=/opt/mcs21/current/backend \
+#     --property=EnvironmentFile=/etc/fyp-secure-file-platform/backend.env \
+#     /opt/mcs21/current/backend/.venv/bin/python scripts/integrity_sweep.py
+#
+# Exit status 3 means at least one stored object was modified, missing or unreadable; that is
+# a finding, not a crash, and the OnFailure= alert below is how it reaches a person.
+
+[Unit]
+Description=Verify stored MCS21 ciphertext objects against their recorded SHA-256
+Wants=network-online.target
+After=network-online.target docker.service
+OnFailure=mcs21-alert@%n.service
+
+[Service]
+Type=oneshot
+User=fypapp
+Group=fypapp
+WorkingDirectory=/opt/mcs21/current/backend
+EnvironmentFile=/etc/fyp-secure-file-platform/backend.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+ExecStart=/opt/mcs21/current/backend/.venv/bin/python scripts/integrity_sweep.py --limit 500 --budget-seconds 1500
+TimeoutStartSec=30min
+Nice=15
+IOSchedulingClass=idle
+
+# Reads the object store and writes database rows only. Nothing here writes to disk.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/var/lib/fyp-secure-file-platform

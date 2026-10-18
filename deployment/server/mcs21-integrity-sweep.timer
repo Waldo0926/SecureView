@@ -1,0 +1,13 @@
+[Unit]
+Description=Verify stored MCS21 ciphertext objects, daily
+
+[Timer]
+# 05:30, after the 04:15 backup and the 05:00 reconcile, so a damaged object is found after the
+# nightly backup set that can restore it was taken, and before people start the working day.
+OnCalendar=*-*-* 05:30:00 Asia/Kuala_Lumpur
+Persistent=true
+AccuracySec=1m
+Unit=mcs21-integrity-sweep.service
+
+[Install]
+WantedBy=timers.target

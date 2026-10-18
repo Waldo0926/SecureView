@@ -1,6 +1,6 @@
 # SecureView Security Overview
 
-This page is a public, portfolio-safe summary of SecureView's security model. It does not replace the private project's detailed threat model or an independent security audit.
+This page is a short summary of SecureView's security model. The full version is in [THREAT_MODEL.md](THREAT_MODEL.md) and [SECURITY_FLOWS.md](SECURITY_FLOWS.md). Neither replaces an independent security audit.
 
 ## Trust boundary
 
@@ -101,4 +101,4 @@ SecureView is a university team project running in production. It has not been i
 - server-side malware scanning of encrypted content;
 - zero-knowledge protection for all metadata.
 
-The detailed internal threat model tracks additional findings and mitigations, but operational details and assessment-only material are left out of this public repository.
+The full [threat model](THREAT_MODEL.md) tracks more findings and mitigations.

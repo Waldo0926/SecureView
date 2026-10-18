@@ -1,0 +1,12 @@
+[Unit]
+Description=Check GitHub main for an MCS21 deployment every two minutes
+
+[Timer]
+OnBootSec=2m
+OnUnitInactiveSec=2m
+RandomizedDelaySec=20s
+AccuracySec=5s
+Unit=mcs21-auto-deploy.service
+
+[Install]
+WantedBy=timers.target

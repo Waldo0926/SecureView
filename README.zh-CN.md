@@ -7,7 +7,7 @@
 [![在线站点](https://img.shields.io/badge/在线站点-secureview.tech-2563eb?style=for-the-badge&logo=googlechrome&logoColor=white)](https://secureview.tech)
 [![API 文档](https://img.shields.io/badge/API-Swagger_UI-85ea2d?style=for-the-badge&logo=swagger&logoColor=black)](https://secureview.tech/docs)
 [![状态](https://img.shields.io/badge/状态-已上线运行-16a34a?style=for-the-badge)](#功能)
-[![源码](https://img.shields.io/badge/源码-评估期间私有-475569?style=for-the-badge)](#源码开放情况)
+[![源码](https://img.shields.io/badge/源码-仅供查看-475569?style=for-the-badge)](#关于这份副本)
 [![许可证](https://img.shields.io/badge/许可证-保留所有权利-dc2626?style=for-the-badge)](LICENSE)
 
 ![Vue 3](https://img.shields.io/badge/Vue_3-TypeScript-42b883?logo=vuedotjs&logoColor=white)
@@ -15,7 +15,7 @@
 ![MySQL](https://img.shields.io/badge/MySQL-8.4-4479a1?logo=mysql&logoColor=white)
 ![Tests](https://img.shields.io/badge/Tests-pytest,_Vitest,_Playwright-2ead33?logo=playwright&logoColor=white)
 
-**2026年10月18日与团队仓库同步。**
+**2026年10月18日与团队仓库同步（团队提交 `16d41ba`）。**
 
 ## 项目概览
 
@@ -23,7 +23,7 @@ SecureView 在**浏览器内、上传之前**完成文件加密。服务器只�
 
 服务器保存公钥、加密后的私钥包、密文和被包裹的文件密钥。用户的加密口令、明文私钥、明文文件密钥和明文文件不会出现在API请求或数据库记录里。
 
-SecureView 已经在 **[https://secureview.tech](https://secureview.tech)** 正式运行（请输入完整的 https:// 地址）。这个仓库是项目的作品集页面，介绍产品、架构、测试结果、截图、视频和我的贡献，不包含团队源码、凭据、测试账号和服务器细节。
+SecureView 已经在 **[https://secureview.tech](https://secureview.tech)** 正式运行（请输入完整的 https:// 地址）。这个仓库包含项目的源码、测试和文档，从团队仓库复制过来，去掉了测试账号和服务器细节，另外有这份产品和我个人贡献的介绍。代码只供阅读，不是开源项目（见 [LICENSE](LICENSE)）。
 
 ### 一览
 
@@ -191,19 +191,37 @@ SecureView 是已经上线运行的**大学团队项目**，安全性**没有经
 
 更多内容见 **[docs/TESTING_AND_PERFORMANCE.md](docs/TESTING_AND_PERFORMANCE.md)**。
 
-## 公开文档
+## 仓库结构
 
-- **[CHANGELOG.md](CHANGELOG.md)**：公开里程碑记录。
-- **[docs/README.md](docs/README.md)**：文档索引。
+| 目录 | 内容 |
+|---|---|
+| [frontend/](frontend/) | Vue 3 + TypeScript应用、浏览器端加密、单元测试和Playwright浏览器测试 |
+| [backend/](backend/) | FastAPI应用、Alembic迁移、运维脚本和pytest测试 |
+| [database/](database/) | MySQL初始化、表结构和校验SQL |
+| [deployment/server/](deployment/server/) | Nginx配置、systemd单元、部署、备份和告警脚本 |
+| [loadtest/](loadtest/) | 容量测试用的压测工具 |
+| [security-lab/](security-lab/) | 隔离环境里的密文篡改演练 |
+| [ci/](ci/) | 团队的GitHub Actions工作流，仅作参考 |
+| [docs/](docs/README.md) | 设计、安全、测试和运维文档，测试报告和扫描结果 |
+| [changelog/](changelog/CHANGELOG.md) | 完整的工程变更记录 |
+
+团队本地运行的方法见 **[docs/DEVELOPER_GUIDE.zh-CN.md](docs/DEVELOPER_GUIDE.zh-CN.md)**。
+
+## 文档
+
+- **[docs/README.md](docs/README.md)**：全部文档索引。
+- **[CHANGELOG.md](CHANGELOG.md)**：简短的公开里程碑记录。
 - **[docs/MEDIA.md](docs/MEDIA.md)**：中英文截图和视频。
 - **[docs/SECURITY_OVERVIEW.md](docs/SECURITY_OVERVIEW.md)**：公开安全模型与局限。
 - **[docs/TESTING_AND_PERFORMANCE.md](docs/TESTING_AND_PERFORMANCE.md)**：测试策略与性能数据。
 
-## 源码开放情况
+## 关于这份副本
 
-主实现仓库在大学团队项目评估期间保持私有。这个仓库不包含团队源码、凭据、测试账号秘密、私钥材料和内部部署细节。
+这是四人团队仓库的一份快照，作为一个提交发布。提交历史和PR留在团队仓库里，所以这里的git blame看不出每个文件是谁写的。我做的部分见[我的贡献](#我的贡献)。
 
-如果学校和团队允许，之后可能会公开更多实现材料。
+发布前去掉了：测试账号密码、CI runner的主机配置、服务器公网IP和备份桶名。
+
+代码公开是为了让人看，不是开源项目：复制、修改、部署或再使用都需要书面许可，见 [LICENSE](LICENSE)。
 
 ---
 

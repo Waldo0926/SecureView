@@ -1,0 +1,75 @@
+# ===== OS / Editor =====
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# ===== Environment / Secrets =====
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+recovery_keys/*
+!recovery_keys/.gitkeep
+
+# ===== Python =====
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+.venv/
+venv/
+env/
+ENV/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# ===== FastAPI / runtime storage =====
+backend/encrypted_files/*
+!backend/encrypted_files/.gitkeep
+backend/temp_files/*
+!backend/temp_files/.gitkeep
+backend/avatars/*
+!backend/avatars/.gitkeep
+backend/logs/*
+!backend/logs/.gitkeep
+
+# ===== Node / Vue =====
+node_modules/
+dist/
+coverage/
+# Playwright output (local runs; CI writes under the runner's temp directory)
+e2e-browser-reports/
+frontend/playwright-report/
+frontend/test-results/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ===== Database / local files =====
+*.sqlite3
+*.db
+*.sql.gz
+*.dump
+
+# ===== Build / archives =====
+*.zip
+*.tar
+*.tar.gz
+
+# ===== Local agent skills =====
+.agents/skills/
+skills-lock.json
+
+# ===== Local agent context =====
+/AGENT_CONTEXT.local.md

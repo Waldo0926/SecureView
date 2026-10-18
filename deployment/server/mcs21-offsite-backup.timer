@@ -1,0 +1,14 @@
+[Unit]
+Description=Encrypted off-server backup of MCS21, daily (24-hour RPO)
+
+[Timer]
+# Daily meets the 24-hour RPO in docs/BACKUP_AND_RECOVERY.md. 02:30 keeps it clear of the
+# same-host mcs21-backup (04:15 Asia/Kuala_Lumpur) and of mcs21-reconcile.timer (05:00),
+# so a backup never overlaps a storage cleanup.
+OnCalendar=*-*-* 02:30:00
+RandomizedDelaySec=10m
+Persistent=true
+Unit=mcs21-offsite-backup.service
+
+[Install]
+WantedBy=timers.target

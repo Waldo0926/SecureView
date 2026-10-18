@@ -1,0 +1,20 @@
+[Unit]
+Description=Remove lapsed MCS21 rows and unreferenced ciphertext objects, daily
+
+[Timer]
+# After the same-host backup, never before it. mcs21-backup.timer fires at 04:15 with up
+# to 20 minutes of random delay and takes a few minutes to dump and archive, so 05:00
+# leaves a margin and each run's deletions come after that morning's rollback point in
+# /var/backups/mcs21-daily. The service's ExecStartPre also waits on the backup lock and
+# refuses to run without a backup from the last 3 hours, so a late or failed backup stops
+# the cleanup rather than racing it. No random delay: it could only eat into that margin.
+#
+# Daily is frequent enough: the retention window is measured in days, and a job that
+# deletes things should run seldom enough that a bad run is noticed before the next one.
+OnCalendar=*-*-* 05:00:00 Asia/Kuala_Lumpur
+Persistent=true
+AccuracySec=1m
+Unit=mcs21-reconcile.service
+
+[Install]
+WantedBy=timers.target

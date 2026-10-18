@@ -1,11 +1,14 @@
-Copyright (c) 2026 Shuoxun Wen. All rights reserved.
+Copyright (c) 2026 Shuoxun Wen and the SecureView (MCS21) team members. All rights reserved.
 
-This repository is publicly visible for portfolio presentation and educational review only.
-Public visibility does not make it open source.
+This repository is publicly visible so that it can be read and reviewed, for example by
+recruiters, interviewers and teachers. Public visibility does not make it open source, and no
+open-source license applies.
 
-Unless you have prior written permission from the copyright holder, no permission is granted to
-copy, modify, distribute, sublicense, sell, commercially use, deploy as a service, or create
-derivative works from this material.
+Unless you have prior written permission from the copyright holders, no permission is granted
+to copy, modify, distribute, sublicense, sell, commercially use, deploy as a service, train
+models on, or create derivative works from any part of this repository, including the source
+code, tests, documentation, images and videos.
 
-SecureView is a university team project (FIT3161/FIT3162, team MCS21). This repository contains
-only portfolio documentation prepared by Shuoxun Wen; it does not contain the team's source code.
+SecureView is a university team project (Monash University Malaysia, FIT3161/FIT3162, team
+MCS21). This repository is a snapshot of the team repository published by Shuoxun Wen, with
+test credentials and server details removed.

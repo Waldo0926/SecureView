@@ -1,0 +1,26 @@
+# Not installed by the deploy tooling (issue #57). Emails the failure of the unit named by
+# the instance: other units reach it with OnFailure=mcs21-alert@%n.service. Install with
+# /usr/local/sbin/mcs21-alert and /etc/fyp-secure-file-platform/alert.env -- see
+# docs/RECONCILIATION_RUNBOOK.md -- then prove delivery end to end with
+#
+#   sudo systemctl start mcs21-alert@test.service
+#
+# Runs as root: it reads the root-only alert.env, the Resend key in backend.env, and the
+# failed unit's journal. It has no OnFailure= of its own, so a failed alert cannot loop;
+# it shows up in `systemctl --failed` and the journal instead.
+
+[Unit]
+Description=Email an alert that %i failed
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/mcs21-alert %i
+TimeoutStartSec=3min
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+RestrictAddressFamilies=AF_UNIX AF_INET AF_INET6

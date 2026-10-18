@@ -1,0 +1,156 @@
+#!/usr/bin/env bash
+# Email a minimal, redacted alert that an MCS21 systemd unit failed.
+#
+# Installed manually, not by the deploy tooling:
+#   sudo install -o root -g root -m 0755 deployment/server/mcs21-alert /usr/local/sbin/mcs21-alert
+# and started only through mcs21-alert@.service, which units reach with
+#   OnFailure=mcs21-alert@%n.service
+# Test delivery with:  sudo systemctl start mcs21-alert@test.service
+#
+# Mail goes through the Resend account the application already uses: RESEND_API_KEY,
+# EMAIL_FROM_ADDRESS and EMAIL_FROM_NAME are read from backend.env. The recipients come
+# from ALERT_EMAIL_TO (comma-separated) in the root-only alert.env. Neither file is
+# sourced -- only those keys are parsed out -- and the API key never reaches argv, the
+# environment of a child process, or the journal: it is written to a 0600 header file
+# in a private temporary directory that curl reads with -H @file.
+#
+# Deliberately do NOT copy journal output into email. Application/ops journals can contain
+# operational metadata and future regressions must not turn an alert transport into a data
+# exfiltration path. The email contains only unit state plus the exact local diagnostic command.
+set -Eeuo pipefail
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+umask 077
+# Times in the mail (the Time: line and systemctl's timestamps) are Kuala Lumpur time, like the
+# site, whatever zone the host is set to.
+export TZ=Asia/Kuala_Lumpur
+
+backend_env=/etc/fyp-secure-file-platform/backend.env
+alert_env=/etc/fyp-secure-file-platform/alert.env
+
+unit="${1:-}"
+if [[ -z "$unit" ]]; then
+    printf 'usage: mcs21-alert <failed-unit-name>\n' >&2
+    exit 2
+fi
+
+# Prints the last assignment of $2 in the env-style file $1, without surrounding quotes.
+env_value() {
+    local file="$1" key="$2" line value
+    line="$(grep -E "^[[:space:]]*(export[[:space:]]+)?${key}=" "$file" | tail -n 1 || true)"
+    [[ -n "$line" ]] || return 0
+    value="${line#*=}"
+    value="${value%$'\r'}"
+    if [[ "$value" == \"*\" || "$value" == \'*\' ]]; then
+        value="${value:1:${#value}-2}"
+    fi
+    printf '%s' "$value"
+}
+
+for file in "$backend_env" "$alert_env"; do
+    if [[ ! -r "$file" ]]; then
+        printf 'mcs21-alert: cannot read %s; no alert was sent for %s\n' "$file" "$unit" >&2
+        exit 1
+    fi
+done
+
+api_key="$(env_value "$backend_env" RESEND_API_KEY)"
+api_url="$(env_value "$backend_env" RESEND_API_URL)"
+api_url="${api_url:-https://api.resend.com/emails}"
+from_address="$(env_value "$backend_env" EMAIL_FROM_ADDRESS)"
+from_name="$(env_value "$backend_env" EMAIL_FROM_NAME)"
+recipients="$(env_value "$alert_env" ALERT_EMAIL_TO)"
+
+missing=()
+[[ -n "$api_key" ]] || missing+=("RESEND_API_KEY in $backend_env")
+[[ -n "$from_address" ]] || missing+=("EMAIL_FROM_ADDRESS in $backend_env")
+[[ -n "$recipients" ]] || missing+=("ALERT_EMAIL_TO in $alert_env")
+if ((${#missing[@]})); then
+    printf 'mcs21-alert: missing %s; no alert was sent for %s\n' "${missing[*]}" "$unit" >&2
+    exit 1
+fi
+
+work="$(mktemp -d /tmp/mcs21-alert.XXXXXXXX)"
+trap 'rm -rf "$work"' EXIT HUP INT TERM
+
+printf 'Authorization: Bearer %s\n' "$api_key" >"$work/headers"
+unset api_key
+
+host="$(hostname -f 2>/dev/null || hostname)"
+now="$(date '+%Y-%m-%d %H:%M:%S MYT (UTC+8)')"
+if [[ "$unit" == test ]]; then
+    subject="[MCS21] Test alert from $host"
+    printf 'This is a test of mcs21-alert@.service. No unit failed.\n' >"$work/status"
+else
+    subject="[MCS21] $unit failed on $host"
+    systemctl show --no-pager \
+        --property=Result,ExecMainStatus,ActiveEnterTimestamp,InactiveEnterTimestamp \
+        -- "$unit" >"$work/status" 2>&1 || true
+fi
+
+ALERT_UNIT="$unit" ALERT_HOST="$host" ALERT_TIME="$now" ALERT_SUBJECT="$subject" \
+    ALERT_FROM_ADDRESS="$from_address" ALERT_FROM_NAME="$from_name" \
+    ALERT_TO="$recipients" ALERT_WORK="$work" \
+    python3 - <<'PY'
+import json
+import os
+from email.headerregistry import Address
+from pathlib import Path
+
+work = Path(os.environ["ALERT_WORK"])
+address = os.environ["ALERT_FROM_ADDRESS"]
+name = os.environ["ALERT_FROM_NAME"].strip()
+local, _, domain = address.partition("@")
+sender = str(Address(name, local, domain)) if name else address
+recipients = [part.strip() for part in os.environ["ALERT_TO"].split(",") if part.strip()]
+unit = os.environ["ALERT_UNIT"]
+# A fixed sentence per unit, never anything read from the unit's output.
+hint = []
+if unit == "mcs21-security-agent.service":
+    hint = [
+        "ExecMainStatus=3 means the security agent has Critical or High findings for the",
+        "last 24 hours; open Admin -> Security agent on the site for the details. Any other",
+        "status means the check itself could not run.",
+        "",
+    ]
+text = "\n".join(
+    [
+        f"Unit:  {unit}",
+        f"Host:  {os.environ['ALERT_HOST']}",
+        f"Time:  {os.environ['ALERT_TIME']}",
+        "",
+        (work / "status").read_text(errors="replace").strip(),
+        "",
+        *hint,
+        "Journal output is intentionally withheld from email to prevent secret or user-data leakage.",
+        f"Inspect locally: sudo journalctl -u {unit} -n 100 --no-pager",
+        "",
+        "Runbook: docs/OBSERVABILITY_AND_INCIDENT_RESPONSE.md",
+        "Backup/reconcile details: docs/BACKUP_AND_RECOVERY.md and",
+        "docs/RECONCILIATION_RUNBOOK.md in the repository.",
+    ]
+)
+payload = {
+    "from": sender,
+    "to": recipients,
+    "subject": os.environ["ALERT_SUBJECT"],
+    "text": text,
+}
+(work / "body.json").write_text(json.dumps(payload))
+PY
+
+status="$(curl --silent --show-error --max-time 30 --retry 3 \
+    --output "$work/response" --write-out '%{http_code}' \
+    --header @"$work/headers" \
+    --header 'Content-Type: application/json' \
+    --header 'User-Agent: SecureView-ops-alert/1.0 (+https://secureview.tech)' \
+    --data-binary @"$work/body.json" \
+    "$api_url")" || status="curl-error"
+
+# The response body can echo recipients, so only the status is ever logged.
+if [[ "$status" =~ ^2[0-9][0-9]$ ]]; then
+    printf 'mcs21-alert: alert for %s sent (HTTP %s)\n' "$unit" "$status"
+else
+    printf 'mcs21-alert: alert for %s NOT delivered (HTTP %s)\n' "$unit" "$status" >&2
+    exit 1
+fi

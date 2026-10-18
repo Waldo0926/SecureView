@@ -1,0 +1,136 @@
+=== steps (concurrent users 1..100) ===
+
+== 1 users  (60.8s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download                60    60   0.0%       506      1526      1674    0.99    0.99
+   upload                  60    60   0.0%       322       694      1209    0.99    0.99
+
+== 5 users  (61.7s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download               107   107   0.0%      1813      3681      3724    1.74    1.74
+   upload                 107   107   0.0%       814      1662      1735    1.74    1.74
+
+== 10 users  (63.7s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download                73    73   0.0%      5668      8240      8302    1.15    1.15
+   upload                 110    73  33.6%      3369      4852      5260    1.15    1.15
+                       errors: {'RemoteProtocolError': 37}
+
+== 20 users  (76.4s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download                89    89   0.0%     11871     12971     13185    1.17    1.17
+   upload                 151    89  41.1%      5800      8472      8475    1.17    1.17
+                       errors: {'RemoteProtocolError': 62}
+
+== 50 users  (94.7s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download               104   104   0.0%     27968     30880     30908    1.10    1.10
+   upload                 140   104  25.7%     18022     18607     18699    1.10    1.10
+                       errors: {'RemoteProtocolError': 36}
+
+== 100 users  (114.3s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download                37    35   5.4%     18523     48696     71634    0.31    0.31
+                       errors: {'http_500': 2}
+   upload                 106    37  65.1%     68183     95730     95730    0.32    0.32
+                       errors: {'http_500': 69}
+
+results: results/steps-20261003T141247Z
+=== sizes (file size x type matrix) ===
+
+== 1MiB  (19.0s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download                 6     6   0.0%       676      4070      4070    0.32    0.32
+   recipient_download       6     6   0.0%       678      1293      1293    0.32    0.32
+   share                    6     6   0.0%       369      1011      1011    0.32    0.00
+   upload                   6     6   0.0%       304       458       458    0.32    0.32
+
+== 10MiB  (108.4s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download                 6     6   0.0%      5902      8188      8188    0.06    0.55
+   recipient_download       6     6   0.0%      7252      7986      7986    0.06    0.55
+   share                    6     6   0.0%       350       479       479    0.06    0.00
+   upload                   6     6   0.0%      2926      8863      8863    0.06    0.55
+
+== 50MiB  (459.6s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download                 6     6   0.0%     29721     32920     32920    0.01    0.65
+   recipient_download       6     6   0.0%     30327     31044     31044    0.01    0.65
+   share                    6     6   0.0%       814      1061      1061    0.01    0.00
+   upload                   6     6   0.0%     13982     17175     17175    0.01    0.65
+
+== 100MiB  (934.0s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download                 6     6   0.0%     62970     64959     64959    0.01    0.64
+   recipient_download       6     6   0.0%     61061     66195     66195    0.01    0.64
+   share                    6     6   0.0%       925      1215      1215    0.01    0.00
+   upload                   6     6   0.0%     30870     32301     32301    0.01    0.64
+
+== 200MiB  (1822.0s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download                 6     6   0.0%    120313    124219    124219    0.00    0.66
+   recipient_download       6     6   0.0%    119236    132484    132484    0.00    0.66
+   share                    6     6   0.0%      1161      1300      1300    0.00    0.00
+   upload                   6     6   0.0%     60495     67531     67531    0.00    0.66
+
+== 500MiB  (4796.8s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download                 6     6   0.0%    295153    370544    370544    0.00    0.63
+   recipient_download       6     6   0.0%    300874    404158    404158    0.00    0.63
+   share                    6     6   0.0%      1042      1192      1192    0.00    0.00
+   upload                   6     6   0.0%    146021    253869    253869    0.00    0.63
+
+results: results/sizes-20261003T142157Z
+=== parallel (tasks per user) ===
+
+== 1 tasks/user  (65.5s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download                83    83   0.0%      2150      3233      4064    1.27    1.27
+   upload                  83    83   0.0%      1446      3487      3813    1.27    1.27
+
+== 2 tasks/user  (73.3s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download                57    57   0.0%      8226     10255     10279    0.78    0.78
+   upload                  92    57  38.0%      5805      7493      7516    0.78    0.78
+                       errors: {'RemoteProtocolError': 35}
+
+== 5 tasks/user  (72.8s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download                84    84   0.0%     15705     17787     17849    1.15    1.15
+   upload                 130    84  35.4%      7391      7825      7879    1.15    1.15
+                       errors: {'RemoteProtocolError': 46}
+
+== 10 tasks/user  (93.0s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download               104   104   0.0%     26653     33422     33474    1.12    1.12
+   upload                 134   104  22.4%     15772     17487     17717    1.12    1.12
+                       errors: {'RemoteProtocolError': 30}
+
+results: results/parallel-20261003T163737Z
+=== logins (simultaneous sign-ins) ===
+
+== 1 at once  (3.3s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   login                    3     3   0.0%        97       146       146    0.90    0.00
+
+== 2 at once  (3.4s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   login                    6     6   0.0%       124       137       137    1.77    0.00
+
+== 4 at once  (3.4s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   login                   12     6  50.0%       128       136       136    1.77    0.00
+                       errors: {'http_429': 6}
+
+== 8 at once  (3.5s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   login                   24     6  75.0%       123       222       222    1.72    0.00
+                       errors: {'http_429': 18}
+
+== 16 at once  (3.9s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   login                   48    14  70.8%       258       354       354    3.55    0.00
+                       errors: {'http_429': 34}
+
+results: results/logins-20261003T164323Z
+=== PHASE1 DONE ===

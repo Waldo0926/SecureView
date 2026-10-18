@@ -1,0 +1,79 @@
+#!/bin/sh
+# Same-host daily backup: a plaintext mysqldump of the live database plus a tar of
+# /var/lib/fyp-secure-file-platform, kept 14 days in /var/backups/mcs21-daily.
+# Run as root by the server-only mcs21-backup.service/.timer (04:15 Asia/Kuala_Lumpur).
+#
+# Not installed by the deploy tooling. Installed manually:
+#   sudo install -o root -g root -m 0755 deployment/server/mcs21-backup /usr/local/sbin/mcs21-backup
+# mcs21-reconcile.service refuses to run without a manifest from this script in the last
+# 3 hours, and waits on the same lock file. Failure alerts: mcs21-backup.service.d/alert.conf.
+set -eu
+
+backup_dir=/var/backups/mcs21-daily
+container=mcs21-mysql
+data_dir=/var/lib/fyp-secure-file-platform
+stamp=$(date -u +%Y%m%dT%H%M%SZ)
+
+umask 077
+install -d -m 700 "$backup_dir"
+
+exec 9>/run/lock/mcs21-backup.lock
+if ! flock -n 9; then
+    echo "Another MCS21 backup is already running." >&2
+    exit 2
+fi
+
+temporary_database="$backup_dir/.mcs21-db-$stamp.sql"
+temporary_database_gzip="$temporary_database.gz"
+temporary_files="$backup_dir/.mcs21-files-$stamp.tar.gz"
+temporary_manifest="$backup_dir/.mcs21-$stamp.sha256"
+
+cleanup() {
+    rm -f "$temporary_database" "$temporary_database_gzip" \
+        "$temporary_files" "$temporary_manifest"
+}
+trap cleanup EXIT HUP INT TERM
+
+docker inspect "$container" >/dev/null 2>&1
+docker exec "$container" sh -c '
+    export MYSQL_PWD=$(cat /run/secrets/mysql-root-password)
+    exec mysqldump \
+        --user=root \
+        --protocol=socket \
+        --single-transaction \
+        --quick \
+        --hex-blob \
+        --routines \
+        --events \
+        --triggers \
+        --no-tablespaces \
+        --skip-lock-tables \
+        fyp_secure_file_platform
+' >"$temporary_database"
+
+gzip -9 "$temporary_database"
+gzip -t "$temporary_database_gzip"
+
+if [ "$data_dir" != /var/lib/fyp-secure-file-platform ]; then
+    echo "Unexpected application data path; refusing to archive it." >&2
+    exit 2
+fi
+install -d -m 700 "$data_dir"
+tar -czf "$temporary_files" -C "$data_dir" .
+gzip -t "$temporary_files"
+
+database_backup="$backup_dir/mcs21-db-$stamp.sql.gz"
+files_backup="$backup_dir/mcs21-files-$stamp.tar.gz"
+manifest="$backup_dir/mcs21-$stamp.sha256"
+
+mv "$temporary_database_gzip" "$database_backup"
+mv "$temporary_files" "$files_backup"
+sha256sum "$database_backup" "$files_backup" >"$temporary_manifest"
+mv "$temporary_manifest" "$manifest"
+
+find "$backup_dir" -maxdepth 1 -type f \
+    \( -name 'mcs21-db-*.sql.gz' -o -name 'mcs21-files-*.tar.gz' -o -name 'mcs21-*.sha256' \) \
+    -mtime +14 -delete
+
+trap - EXIT HUP INT TERM
+echo "MCS21 current-environment backup completed: $stamp"

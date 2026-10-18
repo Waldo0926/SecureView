@@ -1,0 +1,5 @@
+.venv/
+results/
+loadtest-results/
+*accounts*.json
+*.csv

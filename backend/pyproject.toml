@@ -1,0 +1,42 @@
+[tool.pytest.ini_options]
+addopts = "-ra --strict-config --strict-markers"
+pythonpath = ["."]
+testpaths = ["tests"]
+markers = [
+    "integration: requires external infrastructure such as MySQL",
+]
+
+[tool.ruff]
+line-length = 100
+src = ["app", "tests"]
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP", "B", "SIM", "RUF"]
+ignore = [
+    # FastAPI dependency declarations intentionally call Depends/File in defaults.
+    "B008",
+]
+
+[tool.ruff.lint.isort]
+known-first-party = ["app"]
+
+[tool.ruff.format]
+line-ending = "lf"
+quote-style = "double"
+
+[tool.coverage.run]
+branch = true
+source = ["app"]
+
+[tool.coverage.report]
+# Branch coverage of `app/` from the non-MySQL run (`pytest -m "not integration" --cov`),
+# which is what the `backend` CI job gates. Measured at 79.91% when set (issue #58); the
+# floor sits just below so a real regression fails and run-to-run noise does not. The
+# `mysql-gate` job gates the full run (unit + integration, 84.35%) at 82 on its own.
+fail_under = 78
+exclude_also = [
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
+]
+show_missing = true

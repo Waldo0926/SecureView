@@ -1,0 +1,12 @@
+[Unit]
+Description=Deploy the latest MCS21 GitHub main commit when it changes
+Wants=network-online.target docker.service
+After=network-online.target docker.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/mcs21-auto-deploy
+TimeoutStartSec=45min
+Nice=10
+IOSchedulingClass=best-effort
+IOSchedulingPriority=7

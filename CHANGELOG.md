@@ -1,6 +1,13 @@
 # SecureView Public Changelog
 
-This is a **curated public changelog** for the SecureView portfolio repository. The private team repository keeps the full engineering record. This file lists the main milestones and leaves out assessment-only source, test accounts and operational secrets.
+This is a short list of the main milestones. The full engineering changelog is in [changelog/CHANGELOG.md](changelog/CHANGELOG.md).
+
+## 2026-10-18
+
+### Source published
+
+- Published a snapshot of the team repository (commit `16d41ba`): frontend and backend source, tests, database scripts, deployment scripts, the load test tool, the tamper lab and all project documents. The code is view only and not open source.
+- Removed test account passwords and the CI runner host setup, and replaced the server IP and backup bucket name with placeholders.
 
 ## 2026-10-07 to 2026-10-17
 

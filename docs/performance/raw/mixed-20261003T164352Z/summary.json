@@ -1,0 +1,246 @@
+{
+  "scenario": "mixed",
+  "config": {
+    "base_url": "http://127.0.0.1:18000/api/v1",
+    "timeout": 600.0,
+    "algorithm": "AES-256-GCM",
+    "login_concurrency": 2,
+    "insecure": false,
+    "confirm_remote": true,
+    "scenario": "mixed",
+    "users": 5,
+    "duration": 300.0,
+    "size": 1048576,
+    "weights": [
+      70,
+      20,
+      10
+    ],
+    "window": 30.0,
+    "seed": null
+  },
+  "started_utc": 1791045832.730245,
+  "ended_utc": 1791046136.245255,
+  "login": {
+    "count": 5,
+    "ok": 5,
+    "error_rate": 0.0,
+    "errors": {},
+    "request_ms": {
+      "p50": 134.2,
+      "p95": 1052.6,
+      "p99": 1052.6,
+      "max": 1052.6,
+      "mean": 464.5
+    },
+    "crypto_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "max": null,
+      "mean": null
+    },
+    "ops_per_s": 5.0,
+    "mib_per_s": 0.0,
+    "wire_mib_per_s_p50": null,
+    "verified": 0,
+    "verify_failed": 0
+  },
+  "steps": [
+    {
+      "label": "mixed 5 users",
+      "params": {
+        "users": 5,
+        "size": "1MiB",
+        "weights": [
+          70,
+          20,
+          10
+        ],
+        "duration_s": 300.0
+      },
+      "started_utc": 1791045835.573527,
+      "ended_utc": 1791046136.2218504,
+      "results": {
+        "download": {
+          "count": 254,
+          "ok": 254,
+          "error_rate": 0.0,
+          "errors": {},
+          "request_ms": {
+            "p50": 909.2,
+            "p95": 2309.9,
+            "p99": 3737.0,
+            "max": 3758.7,
+            "mean": 1104.4
+          },
+          "crypto_ms": {
+            "p50": 8.6,
+            "p95": 14.1,
+            "p99": 15.3,
+            "max": 15.7,
+            "mean": 8.2
+          },
+          "ops_per_s": 0.84,
+          "mib_per_s": 0.84,
+          "wire_mib_per_s_p50": 1.1,
+          "verified": 254,
+          "verify_failed": 0
+        },
+        "list": {
+          "count": 73,
+          "ok": 73,
+          "error_rate": 0.0,
+          "errors": {},
+          "request_ms": {
+            "p50": 144.2,
+            "p95": 335.5,
+            "p99": 415.2,
+            "max": 415.2,
+            "mean": 177.1
+          },
+          "crypto_ms": {
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null,
+            "mean": null
+          },
+          "ops_per_s": 0.24,
+          "mib_per_s": 0.0,
+          "wire_mib_per_s_p50": null,
+          "verified": 0,
+          "verify_failed": 0
+        },
+        "share": {
+          "count": 74,
+          "ok": 74,
+          "error_rate": 0.0,
+          "errors": {},
+          "request_ms": {
+            "p50": 275.3,
+            "p95": 732.0,
+            "p99": 1238.4,
+            "max": 1238.4,
+            "mean": 361.3
+          },
+          "crypto_ms": {
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null,
+            "mean": null
+          },
+          "ops_per_s": 0.25,
+          "mib_per_s": 0.0,
+          "wire_mib_per_s_p50": null,
+          "verified": 0,
+          "verify_failed": 0
+        },
+        "upload": {
+          "count": 907,
+          "ok": 907,
+          "error_rate": 0.0,
+          "errors": {},
+          "request_ms": {
+            "p50": 1263.6,
+            "p95": 2061.2,
+            "p99": 2474.7,
+            "max": 2851.4,
+            "mean": 1299.0
+          },
+          "crypto_ms": {
+            "p50": 1.3,
+            "p95": 2.4,
+            "p99": 3.8,
+            "max": 14.9,
+            "mean": 1.4
+          },
+          "ops_per_s": 3.02,
+          "mib_per_s": 3.02,
+          "wire_mib_per_s_p50": 0.8,
+          "verified": 0,
+          "verify_failed": 0
+        },
+        "_all": {
+          "count": 1308,
+          "failed": 0,
+          "error_rate": 0.0,
+          "duration_s": 300.6
+        }
+      },
+      "series": [
+        {
+          "t_s": 0.0,
+          "ops": 138,
+          "errors": 0,
+          "p95_ms": 1796.1,
+          "ops_per_s": 4.6
+        },
+        {
+          "t_s": 30.0,
+          "ops": 107,
+          "errors": 0,
+          "p95_ms": 2112.5,
+          "ops_per_s": 3.57
+        },
+        {
+          "t_s": 60.0,
+          "ops": 100,
+          "errors": 0,
+          "p95_ms": 2585.3,
+          "ops_per_s": 3.33
+        },
+        {
+          "t_s": 90.0,
+          "ops": 112,
+          "errors": 0,
+          "p95_ms": 2712.6,
+          "ops_per_s": 3.73
+        },
+        {
+          "t_s": 120.0,
+          "ops": 154,
+          "errors": 0,
+          "p95_ms": 1353.3,
+          "ops_per_s": 5.13
+        },
+        {
+          "t_s": 150.0,
+          "ops": 125,
+          "errors": 0,
+          "p95_ms": 2171.5,
+          "ops_per_s": 4.17
+        },
+        {
+          "t_s": 180.0,
+          "ops": 137,
+          "errors": 0,
+          "p95_ms": 1649.2,
+          "ops_per_s": 4.57
+        },
+        {
+          "t_s": 210.0,
+          "ops": 148,
+          "errors": 0,
+          "p95_ms": 1649.6,
+          "ops_per_s": 4.93
+        },
+        {
+          "t_s": 240.0,
+          "ops": 144,
+          "errors": 0,
+          "p95_ms": 1832.4,
+          "ops_per_s": 4.8
+        },
+        {
+          "t_s": 270.0,
+          "ops": 143,
+          "errors": 0,
+          "p95_ms": 1662.4,
+          "ops_per_s": 4.77
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,281 @@
+{
+  "scenario": "mixed",
+  "config": {
+    "base_url": "http://127.0.0.1:18000/api/v1",
+    "timeout": 600.0,
+    "algorithm": "AES-256-GCM",
+    "login_concurrency": 2,
+    "insecure": false,
+    "confirm_remote": true,
+    "scenario": "mixed",
+    "users": 5,
+    "duration": 900.0,
+    "size": 1048576,
+    "weights": [
+      70,
+      20,
+      10
+    ],
+    "window": 60.0,
+    "seed": null
+  },
+  "started_utc": 1791046136.446582,
+  "ended_utc": 1791047039.1017568,
+  "login": {
+    "count": 5,
+    "ok": 5,
+    "error_rate": 0.0,
+    "errors": {},
+    "request_ms": {
+      "p50": 108.0,
+      "p95": 631.1,
+      "p99": 631.1,
+      "max": 631.1,
+      "mean": 284.9
+    },
+    "crypto_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "max": null,
+      "mean": null
+    },
+    "ops_per_s": 5.0,
+    "mib_per_s": 0.0,
+    "wire_mib_per_s_p50": null,
+    "verified": 0,
+    "verify_failed": 0
+  },
+  "steps": [
+    {
+      "label": "mixed 5 users",
+      "params": {
+        "users": 5,
+        "size": "1MiB",
+        "weights": [
+          70,
+          20,
+          10
+        ],
+        "duration_s": 900.0
+      },
+      "started_utc": 1791046138.70536,
+      "ended_utc": 1791047039.0941324,
+      "results": {
+        "download": {
+          "count": 796,
+          "ok": 796,
+          "error_rate": 0.0,
+          "errors": {},
+          "request_ms": {
+            "p50": 843.3,
+            "p95": 1704.4,
+            "p99": 2287.7,
+            "max": 2603.3,
+            "mean": 957.2
+          },
+          "crypto_ms": {
+            "p50": 8.6,
+            "p95": 11.3,
+            "p99": 14.9,
+            "max": 15.5,
+            "mean": 8.1
+          },
+          "ops_per_s": 0.88,
+          "mib_per_s": 0.88,
+          "wire_mib_per_s_p50": 1.2,
+          "verified": 796,
+          "verify_failed": 0
+        },
+        "list": {
+          "count": 215,
+          "ok": 215,
+          "error_rate": 0.0,
+          "errors": {},
+          "request_ms": {
+            "p50": 152.1,
+            "p95": 381.6,
+            "p99": 487.8,
+            "max": 1024.1,
+            "mean": 190.3
+          },
+          "crypto_ms": {
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null,
+            "mean": null
+          },
+          "ops_per_s": 0.24,
+          "mib_per_s": 0.0,
+          "wire_mib_per_s_p50": null,
+          "verified": 0,
+          "verify_failed": 0
+        },
+        "share": {
+          "count": 217,
+          "ok": 217,
+          "error_rate": 0.0,
+          "errors": {},
+          "request_ms": {
+            "p50": 316.6,
+            "p95": 611.8,
+            "p99": 802.9,
+            "max": 959.2,
+            "mean": 350.1
+          },
+          "crypto_ms": {
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null,
+            "mean": null
+          },
+          "ops_per_s": 0.24,
+          "mib_per_s": 0.0,
+          "wire_mib_per_s_p50": null,
+          "verified": 0,
+          "verify_failed": 0
+        },
+        "upload": {
+          "count": 2798,
+          "ok": 2798,
+          "error_rate": 0.0,
+          "errors": {},
+          "request_ms": {
+            "p50": 1216.2,
+            "p95": 2143.3,
+            "p99": 2607.7,
+            "max": 3697.5,
+            "mean": 1290.7
+          },
+          "crypto_ms": {
+            "p50": 1.4,
+            "p95": 2.3,
+            "p99": 3.3,
+            "max": 12.3,
+            "mean": 1.5
+          },
+          "ops_per_s": 3.11,
+          "mib_per_s": 3.11,
+          "wire_mib_per_s_p50": 0.8,
+          "verified": 0,
+          "verify_failed": 0
+        },
+        "_all": {
+          "count": 4026,
+          "failed": 0,
+          "error_rate": 0.0,
+          "duration_s": 900.4
+        }
+      },
+      "series": [
+        {
+          "t_s": 0.0,
+          "ops": 283,
+          "errors": 0,
+          "p95_ms": 1926.5,
+          "ops_per_s": 4.72
+        },
+        {
+          "t_s": 60.0,
+          "ops": 292,
+          "errors": 0,
+          "p95_ms": 1490.9,
+          "ops_per_s": 4.87
+        },
+        {
+          "t_s": 120.0,
+          "ops": 257,
+          "errors": 0,
+          "p95_ms": 1985.2,
+          "ops_per_s": 4.28
+        },
+        {
+          "t_s": 180.0,
+          "ops": 283,
+          "errors": 0,
+          "p95_ms": 1740.7,
+          "ops_per_s": 4.72
+        },
+        {
+          "t_s": 240.0,
+          "ops": 212,
+          "errors": 0,
+          "p95_ms": 2583.3,
+          "ops_per_s": 3.53
+        },
+        {
+          "t_s": 300.0,
+          "ops": 235,
+          "errors": 0,
+          "p95_ms": 2092.5,
+          "ops_per_s": 3.92
+        },
+        {
+          "t_s": 360.0,
+          "ops": 191,
+          "errors": 0,
+          "p95_ms": 2533.3,
+          "ops_per_s": 3.18
+        },
+        {
+          "t_s": 420.0,
+          "ops": 295,
+          "errors": 0,
+          "p95_ms": 1522.3,
+          "ops_per_s": 4.92
+        },
+        {
+          "t_s": 480.0,
+          "ops": 305,
+          "errors": 0,
+          "p95_ms": 1698.1,
+          "ops_per_s": 5.08
+        },
+        {
+          "t_s": 540.0,
+          "ops": 267,
+          "errors": 0,
+          "p95_ms": 2216.2,
+          "ops_per_s": 4.45
+        },
+        {
+          "t_s": 600.0,
+          "ops": 242,
+          "errors": 0,
+          "p95_ms": 2435.6,
+          "ops_per_s": 4.03
+        },
+        {
+          "t_s": 660.0,
+          "ops": 304,
+          "errors": 0,
+          "p95_ms": 1432.8,
+          "ops_per_s": 5.07
+        },
+        {
+          "t_s": 720.0,
+          "ops": 306,
+          "errors": 0,
+          "p95_ms": 1611.0,
+          "ops_per_s": 5.1
+        },
+        {
+          "t_s": 780.0,
+          "ops": 256,
+          "errors": 0,
+          "p95_ms": 1811.4,
+          "ops_per_s": 4.27
+        },
+        {
+          "t_s": 840.0,
+          "ops": 298,
+          "errors": 0,
+          "p95_ms": 1530.6,
+          "ops_per_s": 4.97
+        }
+      ]
+    }
+  ]
+}

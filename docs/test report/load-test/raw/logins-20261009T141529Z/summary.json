@@ -1,0 +1,241 @@
+{
+  "scenario": "logins",
+  "config": {
+    "base_url": "https://secureview.tech/api/v1",
+    "timeout": 600.0,
+    "algorithm": "AES-256-GCM",
+    "login_concurrency": 2,
+    "insecure": false,
+    "confirm_remote": true,
+    "scenario": "logins",
+    "users": [
+      1,
+      2,
+      4,
+      8,
+      16
+    ],
+    "rounds": 3
+  },
+  "started_utc": 1791555329.8601441,
+  "ended_utc": 1791555350.572382,
+  "login": null,
+  "steps": [
+    {
+      "label": "1 at once",
+      "params": {
+        "users": 1,
+        "rounds": 3
+      },
+      "started_utc": 1791555330.041861,
+      "ended_utc": 1791555333.407945,
+      "results": {
+        "login": {
+          "count": 3,
+          "ok": 3,
+          "error_rate": 0.0,
+          "errors": {},
+          "request_ms": {
+            "p50": 94.7,
+            "p95": 177.3,
+            "p99": 177.3,
+            "max": 177.3,
+            "mean": 120.5
+          },
+          "crypto_ms": {
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null,
+            "mean": null
+          },
+          "ops_per_s": 0.89,
+          "mib_per_s": 0.0,
+          "wire_mib_per_s_p50": null,
+          "verified": 0,
+          "verify_failed": 0
+        },
+        "_all": {
+          "count": 3,
+          "failed": 0,
+          "error_rate": 0.0,
+          "duration_s": 3.4
+        }
+      }
+    },
+    {
+      "label": "2 at once",
+      "params": {
+        "users": 2,
+        "rounds": 3
+      },
+      "started_utc": 1791555333.6668339,
+      "ended_utc": 1791555337.0033357,
+      "results": {
+        "login": {
+          "count": 6,
+          "ok": 6,
+          "error_rate": 0.0,
+          "errors": {},
+          "request_ms": {
+            "p50": 103.7,
+            "p95": 121.6,
+            "p99": 121.6,
+            "max": 121.6,
+            "mean": 108.5
+          },
+          "crypto_ms": {
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null,
+            "mean": null
+          },
+          "ops_per_s": 1.8,
+          "mib_per_s": 0.0,
+          "wire_mib_per_s_p50": null,
+          "verified": 0,
+          "verify_failed": 0
+        },
+        "_all": {
+          "count": 6,
+          "failed": 0,
+          "error_rate": 0.0,
+          "duration_s": 3.3
+        }
+      }
+    },
+    {
+      "label": "4 at once",
+      "params": {
+        "users": 4,
+        "rounds": 3
+      },
+      "started_utc": 1791555337.478844,
+      "ended_utc": 1791555340.8822346,
+      "results": {
+        "login": {
+          "count": 12,
+          "ok": 6,
+          "error_rate": 0.5,
+          "errors": {
+            "http_429": 6
+          },
+          "request_ms": {
+            "p50": 123.8,
+            "p95": 143.2,
+            "p99": 143.2,
+            "max": 143.2,
+            "mean": 126.6
+          },
+          "crypto_ms": {
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null,
+            "mean": null
+          },
+          "ops_per_s": 1.76,
+          "mib_per_s": 0.0,
+          "wire_mib_per_s_p50": null,
+          "verified": 0,
+          "verify_failed": 0
+        },
+        "_all": {
+          "count": 12,
+          "failed": 6,
+          "error_rate": 0.5,
+          "duration_s": 3.4
+        }
+      }
+    },
+    {
+      "label": "8 at once",
+      "params": {
+        "users": 8,
+        "rounds": 3
+      },
+      "started_utc": 1791555341.8252249,
+      "ended_utc": 1791555345.2652597,
+      "results": {
+        "login": {
+          "count": 24,
+          "ok": 6,
+          "error_rate": 0.75,
+          "errors": {
+            "http_429": 18
+          },
+          "request_ms": {
+            "p50": 136.7,
+            "p95": 152.5,
+            "p99": 152.5,
+            "max": 152.5,
+            "mean": 138.0
+          },
+          "crypto_ms": {
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null,
+            "mean": null
+          },
+          "ops_per_s": 1.74,
+          "mib_per_s": 0.0,
+          "wire_mib_per_s_p50": null,
+          "verified": 0,
+          "verify_failed": 0
+        },
+        "_all": {
+          "count": 24,
+          "failed": 18,
+          "error_rate": 0.75,
+          "duration_s": 3.4
+        }
+      }
+    },
+    {
+      "label": "16 at once",
+      "params": {
+        "users": 16,
+        "rounds": 3
+      },
+      "started_utc": 1791555347.1966348,
+      "ended_utc": 1791555350.570416,
+      "results": {
+        "login": {
+          "count": 48,
+          "ok": 4,
+          "error_rate": 0.9167,
+          "errors": {
+            "http_429": 44
+          },
+          "request_ms": {
+            "p50": 110.7,
+            "p95": 142.0,
+            "p99": 142.0,
+            "max": 142.0,
+            "mean": 119.5
+          },
+          "crypto_ms": {
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null,
+            "mean": null
+          },
+          "ops_per_s": 1.19,
+          "mib_per_s": 0.0,
+          "wire_mib_per_s_p50": null,
+          "verified": 0,
+          "verify_failed": 0
+        },
+        "_all": {
+          "count": 48,
+          "failed": 44,
+          "error_rate": 0.9167,
+          "duration_s": 3.4
+        }
+      }
+    }
+  ]
+}

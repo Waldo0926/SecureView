@@ -7,7 +7,7 @@
 [![Live Site](https://img.shields.io/badge/Live_Site-secureview.tech-2563eb?style=for-the-badge&logo=googlechrome&logoColor=white)](https://secureview.tech)
 [![API Docs](https://img.shields.io/badge/API-Swagger_UI-85ea2d?style=for-the-badge&logo=swagger&logoColor=black)](https://secureview.tech/docs)
 [![Status](https://img.shields.io/badge/Status-In_Production-16a34a?style=for-the-badge)](#features)
-[![Source](https://img.shields.io/badge/Source-Private_During_Assessment-475569?style=for-the-badge)](#source-code-availability)
+[![Source](https://img.shields.io/badge/Source-View_Only-475569?style=for-the-badge)](#about-this-copy)
 [![License](https://img.shields.io/badge/License-All_Rights_Reserved-dc2626?style=for-the-badge)](LICENSE)
 
 ![Vue 3](https://img.shields.io/badge/Vue_3-TypeScript-42b883?logo=vuedotjs&logoColor=white)
@@ -15,7 +15,7 @@
 ![MySQL](https://img.shields.io/badge/MySQL-8.4-4479a1?logo=mysql&logoColor=white)
 ![Tests](https://img.shields.io/badge/Tests-pytest,_Vitest,_Playwright-2ead33?logo=playwright&logoColor=white)
 
-**Synced with the team repository on 18 October 2026.**
+**Synced with the team repository on 18 October 2026 (team commit `16d41ba`).**
 
 ## Overview
 
@@ -23,7 +23,7 @@ SecureView encrypts files **in the browser before upload**. The server only stor
 
 The server stores public keys, encrypted private-key bundles, ciphertext and wrapped file keys. A user's encryption passphrase, plaintext private key, plaintext file key and plaintext file never go into an API request or a database row.
 
-SecureView runs in production at **[https://secureview.tech](https://secureview.tech)** (type the full https:// address). This repository is a portfolio page for the project. It documents the product, architecture, test results, screenshots, videos and my contributions. The team's source code, credentials, test accounts and server details are not included.
+SecureView runs in production at **[https://secureview.tech](https://secureview.tech)** (type the full https:// address). This repository has the project's source code, tests and documentation, copied from the team repository with test accounts and server details removed, plus this summary of the product and my contributions. The code is here to read. It is not open source (see [LICENSE](LICENSE)).
 
 ### At a glance
 
@@ -191,19 +191,37 @@ A second run through the public URL on 9 October 2026 recorded **18,256 operatio
 
 More detail: **[docs/TESTING_AND_PERFORMANCE.md](docs/TESTING_AND_PERFORMANCE.md)**.
 
-## Public Documentation
+## Repository Layout
 
-- **[CHANGELOG.md](CHANGELOG.md)**: public milestone history.
-- **[docs/README.md](docs/README.md)**: documentation index.
+| Folder | What it contains |
+|---|---|
+| [frontend/](frontend/) | Vue 3 + TypeScript app, browser crypto, unit tests and Playwright browser tests |
+| [backend/](backend/) | FastAPI app, Alembic migrations, ops scripts and pytest suites |
+| [database/](database/) | MySQL provisioning, schema and verification SQL |
+| [deployment/server/](deployment/server/) | Nginx config, systemd units, deploy, backup and alert scripts |
+| [loadtest/](loadtest/) | The load test tool used for the capacity studies |
+| [security-lab/](security-lab/) | Isolated ciphertext tamper drill |
+| [ci/](ci/) | The team's GitHub Actions workflow, kept for reference |
+| [docs/](docs/README.md) | Design, security, testing and operations documents, test reports and scan results |
+| [changelog/](changelog/CHANGELOG.md) | Full engineering changelog |
+
+How the team ran it locally is in **[docs/DEVELOPER_GUIDE.md](docs/DEVELOPER_GUIDE.md)**.
+
+## Documentation
+
+- **[docs/README.md](docs/README.md)**: index of every document.
+- **[CHANGELOG.md](CHANGELOG.md)**: short public milestone list.
 - **[docs/MEDIA.md](docs/MEDIA.md)**: English and Chinese screenshots and videos.
 - **[docs/SECURITY_OVERVIEW.md](docs/SECURITY_OVERVIEW.md)**: public security model and limitations.
 - **[docs/TESTING_AND_PERFORMANCE.md](docs/TESTING_AND_PERFORMANCE.md)**: test strategy and measured performance.
 
-## Source Code Availability
+## About This Copy
 
-The main implementation repository stays private while the university team project is under assessment. This repository leaves out the team's source code, credentials, test-account secrets, private-key material and internal deployment details.
+This is a snapshot of the four-person team repository, published as one commit. The commit history and pull requests stay in the team repository, so git blame here does not show who wrote each file. My share of the work is listed in [My Contributions](#my-contributions).
 
-More implementation material may be published later if the university and the team allow it.
+Removed before publishing: test account passwords, the CI runner host setup, and the server's public IP and backup bucket name.
+
+The code is shared so reviewers can read it. It is not open source: copying, modifying, deploying or reusing it needs written permission. See [LICENSE](LICENSE).
 
 ---
 

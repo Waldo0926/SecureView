@@ -1,0 +1,6 @@
+# The load generator's own environment. It runs on the operator's machine (or any box that
+# is not the server under test), never inside the backend's virtualenv.
+cryptography==50.0.0
+httpx==0.28.1
+matplotlib==3.10.7
+pytest==9.1.1
