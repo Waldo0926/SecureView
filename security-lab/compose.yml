@@ -1,0 +1,81 @@
+name: secureview-tamper-lab
+
+x-lab-service: &lab-service
+  build:
+    context: ../backend
+    dockerfile: ../security-lab/Dockerfile
+  read_only: true
+  cap_drop: [ALL]
+  security_opt:
+    - no-new-privileges:true
+  pids_limit: 128
+  mem_limit: 768m
+  cpus: 1.0
+  tmpfs:
+    - /tmp:size=64m,noexec,nosuid,nodev
+  environment: &lab-environment
+    APP_ENV: test
+    APP_DEBUG: "false"
+    APP_DOCS_ENABLED: "false"
+    SECRET_KEY: ${LAB_SECRET_KEY:?set LAB_SECRET_KEY}
+    DB_HOST: mysql
+    DB_PORT: "3306"
+    DB_USER: root
+    DB_PASSWORD: ${LAB_MYSQL_ROOT_PASSWORD:?set LAB_MYSQL_ROOT_PASSWORD}
+    DB_NAME: secureview_tamper_test
+    ENCRYPTED_FILE_DIR: /lab/storage/objects
+    TEMP_FILE_DIR: /lab/storage/staging
+  networks: [lab]
+  depends_on:
+    mysql:
+      condition: service_healthy
+  restart: "no"
+
+services:
+  mysql:
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${LAB_MYSQL_ROOT_PASSWORD:?set LAB_MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: secureview_tamper_test
+    healthcheck:
+      test: [CMD-SHELL, "mysqladmin ping -h 127.0.0.1 -uroot -p$$MYSQL_ROOT_PASSWORD --silent"]
+      interval: 3s
+      timeout: 3s
+      retries: 30
+      start_period: 15s
+    read_only: true
+    tmpfs:
+      - /tmp:size=64m,noexec,nosuid,nodev
+      - /var/run/mysqld:uid=999,gid=999,mode=0755,nosuid,nodev
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks: [lab]
+    ports: []
+    restart: "no"
+
+  target:
+    <<: *lab-service
+    volumes:
+      - lab_storage:/lab/storage
+      - lab_evidence:/lab/evidence
+      - lab_private:/lab/private
+      - ./.secureview-tamper-lab:/lab/.secureview-tamper-lab:ro
+
+  attacker:
+    <<: *lab-service
+    # This container receives only the disposable DB credential and lab volumes.  It has no
+    # host network, Docker socket, production environment, or production storage mount.
+    volumes:
+      - lab_storage:/lab/storage
+      - lab_evidence:/lab/evidence
+      - ./.secureview-tamper-lab:/lab/.secureview-tamper-lab:ro
+
+networks:
+  lab:
+    internal: true
+
+volumes:
+  mysql_data:
+  lab_storage:
+  lab_evidence:
+  lab_private:

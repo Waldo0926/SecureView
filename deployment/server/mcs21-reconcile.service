@@ -1,0 +1,51 @@
+# Not installed by the deploy tooling (issue #57). Install deliberately, and enable the
+# timer only after a report-only run on the target host has been read and recorded --
+# see docs/RECONCILIATION_RUNBOOK.md, which also covers disabling, manual runs, rollback
+# and the alert this unit raises on failure.
+#
+# Report only (deletes nothing), as the service account:
+#
+#   sudo systemd-run --pipe --wait --quiet --uid=fypapp --gid=fypapp \
+#     --working-directory=/opt/mcs21/current/backend \
+#     --property=EnvironmentFile=/etc/fyp-secure-file-platform/backend.env \
+#     /opt/mcs21/current/backend/.venv/bin/python scripts/reconcile.py
+#
+# Exit status 3 means the volume guard refused the run and nothing was deleted.
+
+[Unit]
+Description=Remove lapsed MCS21 rows and unreferenced ciphertext objects
+Wants=network-online.target
+# When both are queued together -- a catch-up run after the host was down at 04:15 and
+# 05:00 (Persistent=true) -- the backup finishes first.
+After=network-online.target docker.service mcs21-backup.service
+OnFailure=mcs21-alert@%n.service
+
+[Service]
+Type=oneshot
+User=fypapp
+Group=fypapp
+WorkingDirectory=/opt/mcs21/current/backend
+EnvironmentFile=/etc/fyp-secure-file-platform/backend.env
+Environment=PYTHONDONTWRITEBYTECODE=1
+# Deletions are irreversible, so refuse to start without a fresh same-host rollback point:
+# wait for any running mcs21-backup (it holds this lock), then require a completed set --
+# its manifest is written last -- from the last 3 hours. At 05:00 that is the same
+# morning's set, which holds every object old enough to be deleted (older than the 60-minute
+# grace, so created before 04:00). A failed backup therefore stops the cleanup, and a manual
+# run later in the day needs `systemctl start mcs21-backup.service` first. The "+" runs only
+# this check as root, because /var/backups/mcs21-daily is root-only; the job runs as fypapp.
+ExecStartPre=+/bin/sh -c 'flock -w 1200 /run/lock/mcs21-backup.lock true && test -n "$$(find /var/backups/mcs21-daily -maxdepth 1 -type f -name "mcs21-*.sha256" -mmin -180 -print -quit)" || { echo "mcs21-reconcile: no mcs21-daily backup from the last 3 hours; refusing to delete anything" >&2; exit 1; }'
+# The limits equal the script's defaults; they are spelled out so a change is reviewed here.
+ExecStart=/opt/mcs21/current/backend/.venv/bin/python scripts/reconcile.py --apply --max-deletions 1000 --max-object-deletions 10
+TimeoutStartSec=30min
+Nice=15
+IOSchedulingClass=idle
+
+# The job deletes only rows the runtime account is granted DELETE on, and entries under
+# ENCRYPTED_FILE_DIR and TEMP_FILE_DIR, both inside /var/lib/fyp-secure-file-platform.
+# Nothing here needs to write anywhere else.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/lib/fyp-secure-file-platform

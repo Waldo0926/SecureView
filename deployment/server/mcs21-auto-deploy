@@ -1,0 +1,143 @@
+#!/usr/bin/env bash
+set -Eeuo pipefail
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+umask 027
+
+deploy_user=mcs21-deploy
+mirror=/var/lib/mcs21-deploy/repository.git
+# CI fast-forwards this branch to a commit of main only after every required job has passed
+# on that commit (the `promote` job in .github/workflows/ci.yml). The server deploys this
+# branch, never main directly, so a commit that has not passed CI is not deployed.
+deploy_branch=deploy
+current_link=/opt/mcs21/current
+deploy_lock=/run/lock/mcs21-deploy.lock
+auto_lock=/run/lock/mcs21-auto-deploy.lock
+state_dir=/var/lib/mcs21-auto-deploy
+failed_sha_file=$state_dir/failed-main-sha
+action="${1:-run}"
+
+[[ "$(id -u)" -eq 0 ]] || {
+    printf 'Run as root.\n' >&2
+    exit 2
+}
+
+install -d -o root -g root -m 0700 "$state_dir"
+
+current_sha() {
+    local target
+    target="$(readlink -f "$current_link" 2>/dev/null || true)"
+    if [[ -n "$target" && -f "$target/.mcs21-release" ]]; then
+        cat "$target/.mcs21-release"
+    elif [[ -n "$target" && -d "$target/.git" ]]; then
+        git -c safe.directory="$target" -C "$target" rev-parse HEAD 2>/dev/null || true
+    fi
+}
+
+remote_sha() {
+    runuser -u "$deploy_user" -- git --git-dir="$mirror" rev-parse --verify --quiet "refs/heads/$deploy_branch"
+}
+
+main_sha() {
+    runuser -u "$deploy_user" -- git --git-dir="$mirror" rev-parse --verify --quiet refs/heads/main
+}
+
+show_status() {
+    local current remote main failed=none
+    current="$(current_sha)"
+    remote="$(remote_sha 2>/dev/null || true)"
+    main="$(main_sha 2>/dev/null || true)"
+    [[ -f "$failed_sha_file" ]] && failed="$(<"$failed_sha_file")"
+    printf 'auto_deploy_timer=%s\n' "$(systemctl is-active mcs21-auto-deploy.timer 2>/dev/null || true)"
+    printf 'current_commit=%s\n' "${current:-unknown}"
+    printf 'cached_deploy=%s\n' "${remote:-unknown}"
+    printf 'cached_main=%s\n' "${main:-unknown}"
+    printf 'quarantined_commit=%s\n' "$failed"
+}
+
+case "$action" in
+    status)
+        show_status
+        exit 0
+        ;;
+    retry)
+        rm -f "$failed_sha_file"
+        ;;
+    force|run)
+        ;;
+    *)
+        printf 'Usage: sudo mcs21-auto-deploy {status|retry|force}\n' >&2
+        exit 2
+        ;;
+esac
+
+exec 9>"$auto_lock"
+if ! flock -n 9; then
+    printf 'Another automatic deployment check is already running.\n'
+    exit 0
+fi
+
+# main is fetched too: the release command requires the commit it deploys to be reachable
+# from main, and `status` reports how far main is ahead of what CI has promoted.
+runuser -u "$deploy_user" -- git --git-dir="$mirror" fetch --prune origin \
+    '+refs/heads/main:refs/heads/main'
+if ! runuser -u "$deploy_user" -- git --git-dir="$mirror" fetch origin \
+    "+refs/heads/$deploy_branch:refs/heads/$deploy_branch"; then
+    # Fail closed, but without a failed unit every two minutes: until CI has promoted a
+    # commit there is nothing it is safe to deploy.
+    printf 'Branch %s is missing on origin: CI has not promoted any commit yet, so nothing is deployed.\n' \
+        "$deploy_branch" >&2
+    exit 0
+fi
+target_sha="$(remote_sha)"
+deployed_sha="$(current_sha)"
+[[ "$target_sha" =~ ^[0-9a-f]{40}$ ]] || {
+    printf 'Fetched %s did not resolve to a full commit SHA.\n' "$deploy_branch" >&2
+    exit 2
+}
+
+if [[ "$action" != force && "$target_sha" == "$deployed_sha" ]]; then
+    printf 'Automatic deployment check: current release already matches the latest CI-passed commit (%s).\n' "$target_sha"
+    exit 0
+fi
+
+# A manual `mcs21-deploy all main` can put a release ahead of the last CI-promoted commit.
+# Never let the timer walk that back: only move forward along the history of deploy.
+if [[ "$action" != force && "$deployed_sha" =~ ^[0-9a-f]{40}$ ]] \
+    && runuser -u "$deploy_user" -- git --git-dir="$mirror" merge-base --is-ancestor "$target_sha" "$deployed_sha"; then
+    printf 'Automatic deployment skipped: the running release %s already contains the CI-passed commit %s.\n' \
+        "$deployed_sha" "$target_sha"
+    exit 0
+fi
+
+if [[ "$action" != force && -f "$failed_sha_file" && "$(<"$failed_sha_file")" == "$target_sha" ]]; then
+    printf 'Automatic deployment skipped quarantined commit %s. Use sudo mcs21-auto-deploy retry after investigation.\n' \
+        "$target_sha" >&2
+    # The original failed attempt is retained in the journal and deployment audit log. A
+    # scheduled check that deliberately skips the same quarantined SHA is healthy: return
+    # success so systemd does not emit a fresh service failure every two minutes.
+    exit 0
+fi
+
+if ! flock -n "$deploy_lock" -c true; then
+    printf 'A manual deployment is active; automatic deployment will retry on the next timer run.\n'
+    exit 0
+fi
+
+caller=mcs21-auto-deploy
+[[ "$action" == force ]] && caller=mcs21-auto-deploy-validation
+printf 'Automatic deployment starting for CI-passed commit %s.\n' "$target_sha"
+if SUDO_USER="$caller" /usr/local/sbin/mcs21-deploy all "$target_sha"; then
+    rm -f "$failed_sha_file"
+    logger -t mcs21-auto-deploy -- "result=success commit=$target_sha"
+    printf 'Automatic deployment completed for %s.\n' "$target_sha"
+else
+    temporary_failed="$(mktemp "$state_dir/.failed-main-sha.XXXXXX")"
+    printf '%s\n' "$target_sha" >"$temporary_failed"
+    chmod 0600 "$temporary_failed"
+    mv -f "$temporary_failed" "$failed_sha_file"
+    logger -t mcs21-auto-deploy -- "result=failed commit=$target_sha quarantined=true"
+    printf 'Automatic deployment failed; commit %s is quarantined until main changes or an administrator retries it.\n' \
+        "$target_sha" >&2
+    exit 1
+fi

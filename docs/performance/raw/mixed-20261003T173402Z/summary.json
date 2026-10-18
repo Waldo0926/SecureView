@@ -1,0 +1,578 @@
+{
+  "scenario": "mixed",
+  "config": {
+    "base_url": "http://127.0.0.1:18000/api/v1",
+    "timeout": 600.0,
+    "algorithm": "AES-256-GCM",
+    "login_concurrency": 2,
+    "insecure": false,
+    "confirm_remote": true,
+    "scenario": "mixed",
+    "users": 5,
+    "duration": 3600.0,
+    "size": 1048576,
+    "weights": [
+      70,
+      20,
+      10
+    ],
+    "window": 60.0,
+    "seed": null,
+    "truncated_note": "The generator's home network dropped at 02:31:44 +08; ops after that never reached the server (ConnectError). Kept ops started before it; the untruncated summary is summary.untruncated.json."
+  },
+  "started_utc": 1791048842.398674,
+  "ended_utc": 1791052304.351427,
+  "login": {
+    "count": 5,
+    "ok": 5,
+    "error_rate": 0.0,
+    "errors": {},
+    "request_ms": {
+      "p50": 127.2,
+      "p95": 605.0,
+      "p99": 605.0,
+      "max": 605.0,
+      "mean": 284.3
+    },
+    "crypto_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "max": null,
+      "mean": null
+    },
+    "ops_per_s": 5.0,
+    "mib_per_s": 0.0,
+    "wire_mib_per_s_p50": null,
+    "verified": 0,
+    "verify_failed": 0
+  },
+  "steps": [
+    {
+      "label": "mixed 5 users (soak, first 58 min)",
+      "params": {
+        "users": 5,
+        "size": "1MiB",
+        "weights": [
+          70,
+          20,
+          10
+        ],
+        "duration_s": 3600.0
+      },
+      "started_utc": 1791048847.091715,
+      "ended_utc": 1791052304.351427,
+      "results": {
+        "download": {
+          "count": 1439,
+          "ok": 1439,
+          "error_rate": 0.0,
+          "errors": {},
+          "request_ms": {
+            "p50": 1189.7,
+            "p95": 1965.3,
+            "p99": 2491.5,
+            "max": 4814.3,
+            "mean": 1257.7
+          },
+          "crypto_ms": {
+            "p50": 8.6,
+            "p95": 10.5,
+            "p99": 14.6,
+            "max": 15.5,
+            "mean": 8.2
+          },
+          "ops_per_s": 0.42,
+          "mib_per_s": 0.42,
+          "wire_mib_per_s_p50": 0.8,
+          "verified": 1439,
+          "verify_failed": 0
+        },
+        "list": {
+          "count": 388,
+          "ok": 388,
+          "error_rate": 0.0,
+          "errors": {},
+          "request_ms": {
+            "p50": 316.1,
+            "p95": 612.0,
+            "p99": 777.9,
+            "max": 937.6,
+            "mean": 344.4
+          },
+          "crypto_ms": {
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null,
+            "mean": null
+          },
+          "ops_per_s": 0.11,
+          "mib_per_s": 0.0,
+          "wire_mib_per_s_p50": null,
+          "verified": 0,
+          "verify_failed": 0
+        },
+        "share": {
+          "count": 369,
+          "ok": 369,
+          "error_rate": 0.0,
+          "errors": {},
+          "request_ms": {
+            "p50": 582.2,
+            "p95": 1049.9,
+            "p99": 1417.9,
+            "max": 2544.4,
+            "mean": 619.0
+          },
+          "crypto_ms": {
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null,
+            "mean": null
+          },
+          "ops_per_s": 0.11,
+          "mib_per_s": 0.0,
+          "wire_mib_per_s_p50": null,
+          "verified": 0,
+          "verify_failed": 0
+        },
+        "upload": {
+          "count": 4963,
+          "ok": 4958,
+          "error_rate": 0.001,
+          "errors": {
+            "RemoteProtocolError": 5
+          },
+          "request_ms": {
+            "p50": 2775.1,
+            "p95": 4945.7,
+            "p99": 6367.8,
+            "max": 11859.6,
+            "mean": 2955.0
+          },
+          "crypto_ms": {
+            "p50": 1.4,
+            "p95": 2.3,
+            "p99": 3.3,
+            "max": 22.2,
+            "mean": 1.5
+          },
+          "ops_per_s": 1.43,
+          "mib_per_s": 1.43,
+          "wire_mib_per_s_p50": 0.4,
+          "verified": 0,
+          "verify_failed": 0
+        },
+        "_all": {
+          "count": 7159,
+          "failed": 5,
+          "error_rate": 0.0007,
+          "duration_s": 3457.3
+        }
+      },
+      "series": [
+        {
+          "t_s": 0.0,
+          "ops": 160,
+          "errors": 0,
+          "p95_ms": 3436.1,
+          "ops_per_s": 2.67
+        },
+        {
+          "t_s": 60.0,
+          "ops": 160,
+          "errors": 0,
+          "p95_ms": 2734.3,
+          "ops_per_s": 2.67
+        },
+        {
+          "t_s": 120.0,
+          "ops": 165,
+          "errors": 0,
+          "p95_ms": 3178.4,
+          "ops_per_s": 2.75
+        },
+        {
+          "t_s": 180.0,
+          "ops": 163,
+          "errors": 0,
+          "p95_ms": 2785.7,
+          "ops_per_s": 2.72
+        },
+        {
+          "t_s": 240.0,
+          "ops": 185,
+          "errors": 0,
+          "p95_ms": 2549.2,
+          "ops_per_s": 3.08
+        },
+        {
+          "t_s": 300.0,
+          "ops": 170,
+          "errors": 0,
+          "p95_ms": 2718.6,
+          "ops_per_s": 2.83
+        },
+        {
+          "t_s": 360.0,
+          "ops": 175,
+          "errors": 0,
+          "p95_ms": 2588.1,
+          "ops_per_s": 2.92
+        },
+        {
+          "t_s": 420.0,
+          "ops": 184,
+          "errors": 0,
+          "p95_ms": 2783.9,
+          "ops_per_s": 3.07
+        },
+        {
+          "t_s": 480.0,
+          "ops": 212,
+          "errors": 0,
+          "p95_ms": 2449.9,
+          "ops_per_s": 3.53
+        },
+        {
+          "t_s": 540.0,
+          "ops": 191,
+          "errors": 0,
+          "p95_ms": 2541.9,
+          "ops_per_s": 3.18
+        },
+        {
+          "t_s": 600.0,
+          "ops": 181,
+          "errors": 0,
+          "p95_ms": 2589.0,
+          "ops_per_s": 3.02
+        },
+        {
+          "t_s": 660.0,
+          "ops": 161,
+          "errors": 0,
+          "p95_ms": 3157.5,
+          "ops_per_s": 2.68
+        },
+        {
+          "t_s": 720.0,
+          "ops": 161,
+          "errors": 0,
+          "p95_ms": 3373.3,
+          "ops_per_s": 2.68
+        },
+        {
+          "t_s": 780.0,
+          "ops": 183,
+          "errors": 0,
+          "p95_ms": 2662.2,
+          "ops_per_s": 3.05
+        },
+        {
+          "t_s": 840.0,
+          "ops": 124,
+          "errors": 0,
+          "p95_ms": 5460.2,
+          "ops_per_s": 2.07
+        },
+        {
+          "t_s": 900.0,
+          "ops": 82,
+          "errors": 0,
+          "p95_ms": 5745.6,
+          "ops_per_s": 1.37
+        },
+        {
+          "t_s": 960.0,
+          "ops": 89,
+          "errors": 0,
+          "p95_ms": 6069.9,
+          "ops_per_s": 1.48
+        },
+        {
+          "t_s": 1020.0,
+          "ops": 114,
+          "errors": 0,
+          "p95_ms": 5242.1,
+          "ops_per_s": 1.9
+        },
+        {
+          "t_s": 1080.0,
+          "ops": 70,
+          "errors": 0,
+          "p95_ms": 10611.5,
+          "ops_per_s": 1.17
+        },
+        {
+          "t_s": 1140.0,
+          "ops": 102,
+          "errors": 0,
+          "p95_ms": 4641.5,
+          "ops_per_s": 1.7
+        },
+        {
+          "t_s": 1200.0,
+          "ops": 92,
+          "errors": 0,
+          "p95_ms": 5646.0,
+          "ops_per_s": 1.53
+        },
+        {
+          "t_s": 1260.0,
+          "ops": 104,
+          "errors": 0,
+          "p95_ms": 4298.0,
+          "ops_per_s": 1.73
+        },
+        {
+          "t_s": 1320.0,
+          "ops": 91,
+          "errors": 0,
+          "p95_ms": 5142.4,
+          "ops_per_s": 1.52
+        },
+        {
+          "t_s": 1380.0,
+          "ops": 105,
+          "errors": 0,
+          "p95_ms": 4945.6,
+          "ops_per_s": 1.75
+        },
+        {
+          "t_s": 1440.0,
+          "ops": 128,
+          "errors": 0,
+          "p95_ms": 4136.8,
+          "ops_per_s": 2.13
+        },
+        {
+          "t_s": 1500.0,
+          "ops": 122,
+          "errors": 0,
+          "p95_ms": 4265.8,
+          "ops_per_s": 2.03
+        },
+        {
+          "t_s": 1560.0,
+          "ops": 87,
+          "errors": 0,
+          "p95_ms": 7160.5,
+          "ops_per_s": 1.45
+        },
+        {
+          "t_s": 1620.0,
+          "ops": 117,
+          "errors": 0,
+          "p95_ms": 5315.1,
+          "ops_per_s": 1.95
+        },
+        {
+          "t_s": 1680.0,
+          "ops": 102,
+          "errors": 0,
+          "p95_ms": 5642.4,
+          "ops_per_s": 1.7
+        },
+        {
+          "t_s": 1740.0,
+          "ops": 112,
+          "errors": 0,
+          "p95_ms": 4344.5,
+          "ops_per_s": 1.87
+        },
+        {
+          "t_s": 1800.0,
+          "ops": 122,
+          "errors": 0,
+          "p95_ms": 4970.9,
+          "ops_per_s": 2.03
+        },
+        {
+          "t_s": 1860.0,
+          "ops": 104,
+          "errors": 0,
+          "p95_ms": 4532.3,
+          "ops_per_s": 1.73
+        },
+        {
+          "t_s": 1920.0,
+          "ops": 106,
+          "errors": 0,
+          "p95_ms": 5381.1,
+          "ops_per_s": 1.77
+        },
+        {
+          "t_s": 1980.0,
+          "ops": 121,
+          "errors": 0,
+          "p95_ms": 4173.9,
+          "ops_per_s": 2.02
+        },
+        {
+          "t_s": 2040.0,
+          "ops": 102,
+          "errors": 0,
+          "p95_ms": 4701.9,
+          "ops_per_s": 1.7
+        },
+        {
+          "t_s": 2100.0,
+          "ops": 123,
+          "errors": 0,
+          "p95_ms": 3605.8,
+          "ops_per_s": 2.05
+        },
+        {
+          "t_s": 2160.0,
+          "ops": 109,
+          "errors": 0,
+          "p95_ms": 4657.0,
+          "ops_per_s": 1.82
+        },
+        {
+          "t_s": 2220.0,
+          "ops": 112,
+          "errors": 0,
+          "p95_ms": 4071.2,
+          "ops_per_s": 1.87
+        },
+        {
+          "t_s": 2280.0,
+          "ops": 129,
+          "errors": 0,
+          "p95_ms": 3808.9,
+          "ops_per_s": 2.15
+        },
+        {
+          "t_s": 2340.0,
+          "ops": 124,
+          "errors": 0,
+          "p95_ms": 4163.5,
+          "ops_per_s": 2.07
+        },
+        {
+          "t_s": 2400.0,
+          "ops": 132,
+          "errors": 0,
+          "p95_ms": 4130.1,
+          "ops_per_s": 2.2
+        },
+        {
+          "t_s": 2460.0,
+          "ops": 122,
+          "errors": 0,
+          "p95_ms": 3586.2,
+          "ops_per_s": 2.03
+        },
+        {
+          "t_s": 2520.0,
+          "ops": 138,
+          "errors": 0,
+          "p95_ms": 3571.4,
+          "ops_per_s": 2.3
+        },
+        {
+          "t_s": 2580.0,
+          "ops": 173,
+          "errors": 0,
+          "p95_ms": 2740.4,
+          "ops_per_s": 2.88
+        },
+        {
+          "t_s": 2640.0,
+          "ops": 151,
+          "errors": 0,
+          "p95_ms": 3383.9,
+          "ops_per_s": 2.52
+        },
+        {
+          "t_s": 2700.0,
+          "ops": 137,
+          "errors": 0,
+          "p95_ms": 3772.3,
+          "ops_per_s": 2.28
+        },
+        {
+          "t_s": 2760.0,
+          "ops": 119,
+          "errors": 0,
+          "p95_ms": 4696.1,
+          "ops_per_s": 1.98
+        },
+        {
+          "t_s": 2820.0,
+          "ops": 96,
+          "errors": 0,
+          "p95_ms": 5778.4,
+          "ops_per_s": 1.6
+        },
+        {
+          "t_s": 2880.0,
+          "ops": 110,
+          "errors": 0,
+          "p95_ms": 5075.6,
+          "ops_per_s": 1.83
+        },
+        {
+          "t_s": 2940.0,
+          "ops": 108,
+          "errors": 0,
+          "p95_ms": 4321.6,
+          "ops_per_s": 1.8
+        },
+        {
+          "t_s": 3000.0,
+          "ops": 139,
+          "errors": 0,
+          "p95_ms": 3468.7,
+          "ops_per_s": 2.32
+        },
+        {
+          "t_s": 3060.0,
+          "ops": 119,
+          "errors": 0,
+          "p95_ms": 4311.9,
+          "ops_per_s": 1.98
+        },
+        {
+          "t_s": 3120.0,
+          "ops": 104,
+          "errors": 0,
+          "p95_ms": 5023.0,
+          "ops_per_s": 1.73
+        },
+        {
+          "t_s": 3180.0,
+          "ops": 85,
+          "errors": 0,
+          "p95_ms": 5584.9,
+          "ops_per_s": 1.42
+        },
+        {
+          "t_s": 3240.0,
+          "ops": 85,
+          "errors": 0,
+          "p95_ms": 5734.5,
+          "ops_per_s": 1.42
+        },
+        {
+          "t_s": 3300.0,
+          "ops": 81,
+          "errors": 0,
+          "p95_ms": 8059.8,
+          "ops_per_s": 1.35
+        },
+        {
+          "t_s": 3360.0,
+          "ops": 16,
+          "errors": 5,
+          "p95_ms": 5197.0,
+          "ops_per_s": 0.18
+        }
+      ]
+    }
+  ]
+}

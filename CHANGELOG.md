@@ -1,6 +1,41 @@
 # SecureView Public Changelog
 
-This is a **curated public changelog** for the SecureView portfolio repository. The private team repository keeps the exhaustive engineering record; this file contains milestones that are useful to a public reader without exposing assessment-only source, test accounts or operational secrets.
+This is a short list of the main milestones. The full engineering changelog is in [changelog/CHANGELOG.md](changelog/CHANGELOG.md).
+
+## 2026-10-18
+
+### Source published
+
+- Published a snapshot of the team repository (commit `16d41ba`): frontend and backend source, tests, database scripts, deployment scripts, the load test tool, the tamper lab and all project documents. The code is view only and not open source.
+- Removed test account passwords and the CI runner host setup, and replaced the server IP and backup bucket name with placeholders.
+
+## 2026-10-07 to 2026-10-17
+
+### Passphrase and account hardening
+
+- Users can change their encryption passphrase in Settings.
+- Passphrase strength check rejects common, patterned and account-derived passphrases.
+- The passphrase is asked again on every download and share. "Access Records" is renamed "Activity Log".
+- Registration no longer reveals whether an email exists, and account deletion is throttled.
+- An admin login-password reset now forces a new password, enforced by the server. The last admin account is protected.
+
+### Cryptography, audit and operations
+
+- AES-192-GCM works in every browser, all six suites are shared end to end, and the cipher test vectors are also checked on the server.
+- Audit log can be filtered by event type, result, date and keyword, and loads page by page.
+- Security Agent reports one address signing into many accounts as a single finding.
+- Clearer messages for recovery requests and refused downloads. The Integrity tab gives a restore command that works from the nightly backup.
+- Per-address limits are sized for a venue network behind one NAT.
+- Deploys keep the newest 10 pre-deploy backups, and each MySQL deadlock retry is logged.
+- All times on the site are shown in Kuala Lumpur time (MYT).
+
+### Evidence and media
+
+- 2026-10-09: load test re-run through the public URL: 18,256 operations, 7,444 verified downloads, 0 integrity failures, no HTTP 500 at 100 users.
+- 2026-10-12: OWASP ZAP re-scan, still 0 FAIL.
+- 2026-10-13: CI run with 718 backend unit, 786 MySQL-suite, 899 frontend, 977 frontend live and 57 browser tests passing.
+- New home-page copy, and the Help videos re-made at 1080p.
+- All test results collected into one test report folder.
 
 ## 2026-10-06
 
@@ -10,8 +45,8 @@ This is a **curated public changelog** for the SecureView portfolio repository. 
 - Added administrator login-password reset with a one-time temporary password, session revocation and audit logging. Encryption passphrases and file keys remain outside administrator access.
 - Added a Settings flow for users to change their own login password.
 - Synced the public portfolio README with the current feature set, testing numbers, October performance study and latest UI.
-- Replaced the old portfolio screenshot section with the freshly recorded October walkthrough and demo media.
-- Added a public documentation index, demo/media guide, security overview, and testing/performance summary.
+- Replaced the old portfolio screenshot section with the October walkthrough and Help videos.
+- Added a public documentation index, media guide, security overview, and testing/performance summary.
 
 ## 2026-10-05
 
@@ -30,8 +65,8 @@ This is a **curated public changelog** for the SecureView portfolio repository. 
 ### Capacity bottleneck fixed and security scans recorded
 
 - Diagnosed the 100-user upload failure as an interaction between the API database pool and worker thread pool rather than CPU saturation.
-- After the fix, measured upload failures at 100 users fell from about 80% to 0%, throughput increased from 0.33 to 56 operations/second, and the staging re-run completed 102/102 uploads.
-- Recorded an OWASP ZAP baseline scan with 0 FAIL, 8 WARN and 59 PASS; static security-header findings were fixed in Nginx.
+- After the fix, measured upload failures at 100 users fell from up to 78% to 0%, throughput increased from 0.33 to 56 operations/second, and the staging re-run completed 102/102 uploads.
+- Recorded an OWASP ZAP baseline scan with 0 FAIL. After the static security-header findings were fixed in Nginx, the result was 0 FAIL, 5 WARN and 62 PASS.
 - Recorded clean production-dependency results for pip-audit and npm audit.
 - Added encrypted off-server backup/restore evidence and isolated tamper testing.
 
@@ -45,7 +80,7 @@ This is a **curated public changelog** for the SecureView portfolio repository. 
 - Ran long mixed-load tests and measured up to 50 concurrent users without server errors.
 - Used the load tool to expose concurrency-only MySQL deadlocks and added regression tests after fixing them.
 
-## Late September – early October 2026
+## Late September to early October 2026
 
 ### Security, cryptography and product hardening
 

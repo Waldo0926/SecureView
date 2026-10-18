@@ -1,0 +1,50 @@
+from enum import StrEnum
+
+
+class SystemRole(StrEnum):
+    USER = "USER"
+    ADMIN = "ADMIN"
+    RECOVERY_OFFICER = "RECOVERY_OFFICER"
+
+
+class UserStatus(StrEnum):
+    ACTIVE = "ACTIVE"
+    DISABLED = "DISABLED"
+    DELETED = "DELETED"
+
+
+class SessionStatus(StrEnum):
+    ACTIVE = "ACTIVE"
+    EXPIRED = "EXPIRED"
+    REVOKED = "REVOKED"
+
+
+class LoginThrottleScope(StrEnum):
+    ACCOUNT = "ACCOUNT"
+    IP = "IP"
+    REAUTH_ACCOUNT = "REAUTH_ACCOUNT"
+    REAUTH_IP = "REAUTH_IP"
+    REGISTRATION_IP = "REGISTRATION_IP"
+    VERIFICATION_SEND_EMAIL = "VERIFICATION_SEND_EMAIL"
+    VERIFICATION_SEND_IP = "VERIFICATION_SEND_IP"
+    VERIFICATION_CHECK_EMAIL = "VERIFICATION_CHECK_EMAIL"
+    VERIFICATION_CHECK_IP = "VERIFICATION_CHECK_IP"
+
+
+class VerificationPurpose(StrEnum):
+    REGISTRATION = "REGISTRATION"
+    PASSWORD_RESET = "PASSWORD_RESET"
+
+
+class VerificationCodeStatus(StrEnum):
+    PENDING = "PENDING"
+    CONSUMED = "CONSUMED"
+    INVALIDATED = "INVALIDATED"
+
+
+class FileCapability(StrEnum):
+    VIEW = "VIEW"
+    DOWNLOAD = "DOWNLOAD"
+    SHARE = "SHARE"
+    REVOKE = "REVOKE"
+    MANAGE = "MANAGE"

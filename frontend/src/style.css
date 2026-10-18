@@ -1,0 +1,193 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@custom-variant dark (&:is(.dark *));
+
+:root {
+  /* "Sealed" palette: warm paper, near-black ink, one colour per meaning.
+     Green only ever says verified/sealed, red only ever says changed/destructive. */
+  --background: #f6f6f3;
+  --foreground: #0a0c10;
+  --card: #ffffff;
+  --card-foreground: #0a0c10;
+  --popover: #ffffff;
+  --popover-foreground: #0a0c10;
+  --primary: #0a0c10;
+  --primary-foreground: #ffffff;
+  --secondary: #efefeb;
+  --secondary-foreground: #0a0c10;
+  --muted: #efefeb;
+  --muted-foreground: #5e6573;
+  --accent: #efefeb;
+  --accent-foreground: #0a0c10;
+  --destructive: #b42318;
+  --destructive-foreground: #b42318;
+  --destructive-soft: #fcebea;
+  --success: #0b7a55;
+  --success-foreground: #ffffff;
+  --success-soft: #e7f4ee;
+  --border: #e3e3de;
+  --input: #d6d6d0;
+  --ring: #2546e8;
+  --chart-1: #0a0c10;
+  --chart-2: #0b7a55;
+  --chart-3: #2546e8;
+  --chart-4: #b45309;
+  --chart-5: #b42318;
+  --radius: 0.5rem;
+  --sidebar: #ffffff;
+  --sidebar-foreground: #0a0c10;
+  --sidebar-primary: #0a0c10;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #efefeb;
+  --sidebar-accent-foreground: #0a0c10;
+  --sidebar-border: #e3e3de;
+  --sidebar-ring: #2546e8;
+}
+
+.dark {
+  /* Near-black with a cool cast. Primary actions are near-white; mint is reserved for success
+     (verified, sealed) and never marks a button. */
+  --background: #0b0d12;
+  --foreground: #eef0f3;
+  --card: #12151c;
+  --card-foreground: #eef0f3;
+  --popover: #12151c;
+  --popover-foreground: #eef0f3;
+  --primary: #eef0f3;
+  --primary-foreground: #07090d;
+  --secondary: #1a1e27;
+  --secondary-foreground: #eef0f3;
+  --muted: #1a1e27;
+  --muted-foreground: #9aa1ae;
+  --accent: #1a1e27;
+  --accent-foreground: #eef0f3;
+  --destructive: #ff8a80;
+  --destructive-foreground: #ff8a80;
+  --destructive-soft: rgb(255 138 128 / 0.14);
+  --success: #7ce0b5;
+  --success-foreground: #07090d;
+  --success-soft: rgb(124 224 181 / 0.14);
+  --border: #252a35;
+  --input: #303644;
+  --ring: #8fa8ff;
+  --chart-1: #eef0f3;
+  --chart-2: #8fa8ff;
+  --chart-3: #f5b942;
+  --chart-4: #c4a4ff;
+  --chart-5: #ff8a80;
+  --sidebar: #12151c;
+  --sidebar-foreground: #eef0f3;
+  --sidebar-primary: #eef0f3;
+  --sidebar-primary-foreground: #07090d;
+  --sidebar-accent: #1a1e27;
+  --sidebar-accent-foreground: #eef0f3;
+  --sidebar-border: #252a35;
+  --sidebar-ring: #8fa8ff;
+}
+
+@theme inline {
+  --font-sans: 'Geist Variable', system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+  --font-mono: 'Geist Mono Variable', ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-destructive-soft: var(--destructive-soft);
+  --color-success: var(--success);
+  --color-success-foreground: var(--success-foreground);
+  --color-success-soft: var(--success-soft);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-chart-1: var(--chart-1);
+  --color-chart-2: var(--chart-2);
+  --color-chart-3: var(--chart-3);
+  --color-chart-4: var(--chart-4);
+  --color-chart-5: var(--chart-5);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --color-sidebar: var(--sidebar);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-ring: var(--sidebar-ring);
+}
+
+@layer base {
+  html {
+    scroll-padding-top: 6rem;
+  }
+  * {
+    @apply border-border outline-ring/50;
+  }
+  body {
+    @apply bg-background text-foreground font-sans antialiased;
+    font-feature-settings: 'cv11', 'ss01';
+  }
+  h1, h2, h3 {
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+  }
+  /* A heading that has to wrap splits into even lines; running text avoids leaving one or two
+     words alone on its last line. Two-sentence intros use SentenceLines to break between sentences. */
+  h4 {
+    text-wrap: balance;
+  }
+  p, li, dd, figcaption, blockquote {
+    text-wrap: pretty;
+  }
+  code, kbd, pre, samp {
+    font-family: var(--font-mono);
+  }
+}
+
+/*
+ * iOS Safari zooms the whole page when a field smaller than 16 px takes focus, and does not
+ * zoom back out, which throws the layout sideways mid-form. On touch screens a field is
+ * therefore never smaller than that. This sits outside the Tailwind layers on purpose: a
+ * layered rule would lose to utility classes such as `text-sm` on the very inputs it is for.
+ */
+@media (pointer: coarse) {
+  input:not([type='checkbox']):not([type='radio']):not([type='file']):not([type='range']),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
+/* Page scaffolding shared by every page: one container width, one centred header. */
+.product-page { position: relative; padding-block: 3.5rem; }
+@media (min-width: 768px) { .product-page { padding-block: 4.5rem; } }
+.page-container { margin-inline: auto; width: 100%; max-width: 72rem; padding-inline: 1rem; position: relative; }
+
+.page-header { display: flex; flex-direction: column; align-items: center; text-align: center; margin: 0 auto 2.5rem; }
+@media (min-width: 768px) { .page-header { margin-bottom: 3.5rem; } }
+.page-header-eyebrow { margin-bottom: .75rem; font-family: var(--font-mono); font-size: .75rem; line-height: 1; text-transform: uppercase; letter-spacing: .14em; color: var(--muted-foreground); }
+.page-header-title { font-size: 2rem; font-weight: 700; line-height: 1.1; letter-spacing: -.03em; text-wrap: balance; color: var(--foreground); }
+@media (min-width: 768px) { .page-header-title { font-size: 3rem; } }
+.page-header-subtitle { margin-top: 1rem; font-size: 1rem; line-height: 1.6; color: var(--muted-foreground); text-wrap: pretty; }
+@media (min-width: 768px) { .page-header-subtitle { font-size: 1.125rem; } }
+/* Only a paragraph keeps a reading measure, and it stays on the centre line. */
+.page-header-long, .reading-measure { max-width: 70ch; }
+/* 70ch is a measure for Latin text. Chinese is set at about half as many characters per line width, so
+   the cap would only push a short paragraph onto a second line beside empty space. */
+:lang(zh) .page-header-long, :lang(zh) .reading-measure { max-width: none; }
+.page-header-actions { margin-top: 1.5rem; display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: .75rem; }

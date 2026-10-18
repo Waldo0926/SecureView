@@ -1,0 +1,48 @@
+=== phase1 finished at Sun Oct  4 00:43:52 +08 2026 ===
+=== mixed 5 users 300s (Sun Oct  4 00:43:52 +08 2026) ===
+
+== mixed 5 users  (300.6s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download               254   254   0.0%       909      2310      3737    0.84    0.84
+   list                    73    73   0.0%       144       336       415    0.24    0.00
+   share                   74    74   0.0%       275       732      1238    0.25    0.00
+   upload                 907   907   0.0%      1264      2061      2475    3.02    3.02
+
+results: results/mixed-20261003T164352Z
+=== soak mixed 5 users 900s (Sun Oct  4 00:48:56 +08 2026) ===
+
+== mixed 5 users  (900.4s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download               796   796   0.0%       843      1704      2288    0.88    0.88
+   list                   215   215   0.0%       152       382       488    0.24    0.00
+   share                  217   217   0.0%       317       612       803    0.24    0.00
+   upload                2798  2798   0.0%      1216      2143      2608    3.11    3.11
+
+results: results/mixed-20261003T164856Z
+=== soak mixed 5 users 1800s (Sun Oct  4 01:03:59 +08 2026) ===
+
+== mixed 5 users  (1800.6s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download              1430  1430   0.0%       961      1927      2629    0.79    0.79
+   list                   359   359   0.0%       211       441       681    0.20    0.00
+   share                  374   374   0.0%       354       718      1101    0.21    0.00
+   upload                4716  4716   0.0%      1423      2597      3258    2.62    2.62
+
+results: results/mixed-20261003T170359Z
+=== soak mixed 5 users 3600s (Sun Oct  4 01:34:02 +08 2026) ===
+
+== mixed 5 users  (3600.0s)
+   op                       n    ok   err%    p50 ms    p95 ms    p99 ms   ops/s   MiB/s
+   download             83006  1439  98.3%      1190      1965      2492    0.40    0.40
+                       errors: {'ConnectError': 81567}
+   list                 20779   388  98.1%       316       612       778    0.11    0.00
+                       errors: {'ConnectError': 20391}
+   share                20854   369  98.2%       582      1050      1418    0.10    0.00
+                       errors: {'ConnectError': 20485}
+   upload              290241  4958  98.3%      2775      4946      6368    1.38    1.38
+                       errors: {'RemoteProtocolError': 5, 'ConnectError': 285278}
+
+results: results/mixed-20261003T173402Z
+=== overload and recovery 5,50,100,5 (Sun Oct  4 02:34:09 +08 2026) ===
+setup failed: sign-in failed for loadtest-82a7e1-001: ConnectError
+=== PHASE2 DONE Sun Oct  4 02:34:10 +08 2026 ===

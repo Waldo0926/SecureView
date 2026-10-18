@@ -1,0 +1,270 @@
+{
+  "$comment": "Raw evidence for docs/THREAT_MODEL.md section 9 (Issue #60 step 2). Browser rows come from /benchmark/argon2 on a local production build (vite preview); the attacker row from backend/scripts/benchmark_argon2_offline.py. Argon2id KEK equivalence between the two is locked by the argon2id_kek vectors in docs/crypto/test_vectors.json.",
+  "browser_unlock": [
+    {
+      "client": "Chrome 153, macOS, Apple Silicon (UA reports Intel; frozen UA string)",
+      "measuredAt": "2026-09-30T13:53:00.181Z",
+      "device": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/153.0.0.0 Safari/537.36",
+        "hardwareConcurrency": 10,
+        "deviceMemoryGiB": 16
+      },
+      "results": [
+        {
+          "label": "Production (64 MiB, t=3)",
+          "memoryKib": 65536,
+          "iterations": 3,
+          "parallelism": 1,
+          "runsMs": [
+            100,
+            100,
+            98,
+            101,
+            98
+          ],
+          "medianMs": 100,
+          "minMs": 98,
+          "maxMs": 101,
+          "error": null
+        },
+        {
+          "label": "64 MiB, t=6",
+          "memoryKib": 65536,
+          "iterations": 6,
+          "parallelism": 1,
+          "runsMs": [
+            196,
+            195,
+            195,
+            194,
+            196
+          ],
+          "medianMs": 195,
+          "minMs": 194,
+          "maxMs": 196,
+          "error": null
+        },
+        {
+          "label": "128 MiB, t=3",
+          "memoryKib": 131072,
+          "iterations": 3,
+          "parallelism": 1,
+          "runsMs": [
+            203,
+            213,
+            200,
+            206,
+            211
+          ],
+          "medianMs": 206,
+          "minMs": 200,
+          "maxMs": 213,
+          "error": null
+        },
+        {
+          "label": "256 MiB, t=3",
+          "memoryKib": 262144,
+          "iterations": 3,
+          "parallelism": 1,
+          "runsMs": [
+            426,
+            428,
+            415,
+            418,
+            437
+          ],
+          "medianMs": 426,
+          "minMs": 415,
+          "maxMs": 437,
+          "error": null
+        }
+      ]
+    },
+    {
+      "client": "Safari 18.6, macOS, same machine",
+      "measuredAt": "2026-09-30T13:55:09.325Z",
+      "device": {
+        "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.6 Safari/605.1.15",
+        "hardwareConcurrency": 8,
+        "deviceMemoryGiB": null
+      },
+      "results": [
+        {
+          "label": "Production (64 MiB, t=3)",
+          "memoryKib": 65536,
+          "iterations": 3,
+          "parallelism": 1,
+          "runsMs": [
+            102,
+            104,
+            107,
+            107,
+            106
+          ],
+          "medianMs": 106,
+          "minMs": 102,
+          "maxMs": 107,
+          "error": null
+        },
+        {
+          "label": "64 MiB, t=6",
+          "memoryKib": 65536,
+          "iterations": 6,
+          "parallelism": 1,
+          "runsMs": [
+            218,
+            205,
+            203,
+            205,
+            292
+          ],
+          "medianMs": 205,
+          "minMs": 203,
+          "maxMs": 292,
+          "error": null
+        },
+        {
+          "label": "128 MiB, t=3",
+          "memoryKib": 131072,
+          "iterations": 3,
+          "parallelism": 1,
+          "runsMs": [
+            1367,
+            1327,
+            1386,
+            1312,
+            1318
+          ],
+          "medianMs": 1327,
+          "minMs": 1312,
+          "maxMs": 1386,
+          "error": null
+        },
+        {
+          "label": "256 MiB, t=3",
+          "memoryKib": 262144,
+          "iterations": 3,
+          "parallelism": 1,
+          "runsMs": [
+            437,
+            435,
+            423,
+            433,
+            427
+          ],
+          "medianMs": 433,
+          "minMs": 423,
+          "maxMs": 437,
+          "error": null
+        }
+      ]
+    },
+    {
+      "client": "Quark 10.18 on iOS 26.6 (WebKit, as every iOS browser is)",
+      "measuredAt": "2026-09-30T13:54:16.099Z",
+      "device": {
+        "userAgent": "Mozilla/5.0 (iPhone; CPU iPhone OS 26_6 like Mac OS X; zh-cn) AppleWebKit/601.1.46 (KHTML, like Gecko) Mobile/23G71 Quark/10.18.5.3215 Mobile",
+        "hardwareConcurrency": 4,
+        "deviceMemoryGiB": null
+      },
+      "results": [
+        {
+          "label": "Production (64 MiB, t=3)",
+          "memoryKib": 65536,
+          "iterations": 3,
+          "parallelism": 1,
+          "runsMs": [
+            153,
+            151,
+            150,
+            151,
+            152
+          ],
+          "medianMs": 151,
+          "minMs": 150,
+          "maxMs": 153,
+          "error": null
+        },
+        {
+          "label": "64 MiB, t=6",
+          "memoryKib": 65536,
+          "iterations": 6,
+          "parallelism": 1,
+          "runsMs": [
+            304,
+            291,
+            269,
+            263,
+            260
+          ],
+          "medianMs": 269,
+          "minMs": 260,
+          "maxMs": 304,
+          "error": null
+        },
+        {
+          "label": "128 MiB, t=3",
+          "memoryKib": 131072,
+          "iterations": 3,
+          "parallelism": 1,
+          "runsMs": [
+            285,
+            285,
+            265,
+            268,
+            266
+          ],
+          "medianMs": 268,
+          "minMs": 265,
+          "maxMs": 285,
+          "error": null
+        },
+        {
+          "label": "256 MiB, t=3",
+          "memoryKib": 262144,
+          "iterations": 3,
+          "parallelism": 1,
+          "runsMs": [
+            585,
+            551,
+            555,
+            547,
+            576
+          ],
+          "medianMs": 555,
+          "minMs": 547,
+          "maxMs": 585,
+          "error": null
+        }
+      ]
+    }
+  ],
+  "offline_attacker": {
+    "benchmark": "secureview-argon2id-offline-attacker",
+    "version": 1,
+    "measured_at": "2026-09-30T13:56:35+00:00",
+    "machine": {
+      "platform": "macOS-15.7.7-arm64-arm-64bit-Mach-O",
+      "processor": "arm",
+      "logical_cpus": 10,
+      "python": "3.13.3"
+    },
+    "parameters": {
+      "memory_kib": 65536,
+      "iterations": 3,
+      "parallelism": 1
+    },
+    "single_core": {
+      "median_ms": 88.7,
+      "min_ms": 88.3,
+      "max_ms": 89.7,
+      "guesses_per_second": 11.28
+    },
+    "all_cores": {
+      "workers": 10,
+      "guesses": 300,
+      "seconds": 5.69,
+      "guesses_per_second": 52.77
+    }
+  }
+}

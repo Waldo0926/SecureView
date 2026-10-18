@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-labelledby="title desc">
+  <title id="title">Secure View icon</title>
+  <desc id="desc">A white shield outlined in black on a transparent background, with a black eye and a white keyhole.</desc>
+  <defs>
+    <mask id="shield-cutouts" maskUnits="userSpaceOnUse" x="0" y="0" width="128" height="128">
+      <rect width="128" height="128" fill="#fff"/>
+      <path d="M29 64Q64 27 99 64Q64 101 29 64Z" fill="#000"/>
+      <path d="M84 20v12a6 6 0 0 0 6 6h17" fill="none" stroke="#000" stroke-width="6" stroke-linejoin="round"/>
+    </mask>
+  </defs>
+  <path d="M64 9 103 24Q110 27 110 34V60C110 86 93 106 67 119Q64 121 61 119C35 106 18 86 18 60V34Q18 27 25 24Z" fill="#000"/>
+  <path d="M64 9 103 24Q110 27 110 34V60C110 86 93 106 67 119Q64 121 61 119C35 106 18 86 18 60V34Q18 27 25 24Z" fill="#fff" mask="url(#shield-cutouts)"/>
+  <path d="M64 9 103 24Q110 27 110 34V60C110 86 93 106 67 119Q64 121 61 119C35 106 18 86 18 60V34Q18 27 25 24Z" fill="none" stroke="#000" stroke-width="5" stroke-linejoin="round"/>
+  <path d="M64 52a9 9 0 0 1 5 16.48L72 78H56l3-9.52A9 9 0 0 1 64 52Z" fill="#fff"/>
+</svg>

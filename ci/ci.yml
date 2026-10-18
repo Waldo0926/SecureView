@@ -1,0 +1,617 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+# Every job runs on the project's own runner on the VPS (deployment/ci-runner/), not on
+# GitHub-hosted machines: the free allowance for a private repository is 2,000 minutes a month
+# and ran out on 2026-10-04. The runner is isolated from production by its own Docker daemon,
+# network and firewall rule. Three runners take three jobs at once, so a run takes about as
+# long as on GitHub's parallel machines. If they are down, jobs wait in the queue; to fall back, change
+# `[self-hosted, mcs21-ci]` back to `ubuntu-latest`.
+
+jobs:
+  # Decides whether this change can affect anything the tests check. A change made only of
+  # Markdown files, or only of files under docs/ (except docs/crypto/, whose test vectors the
+  # frontend and loadtest suites read), cannot, so the five test jobs are skipped for it and
+  # the run passes in about a minute instead of thirteen billed minutes. The free Actions
+  # allowance for a private repository is 2,000 minutes a month, and documentation PRs were
+  # using a large share of it. Anything uncertain (a range that cannot be diffed, a new
+  # branch) counts as code, so the full suite runs.
+  changes:
+    name: changes
+    runs-on: [self-hosted, mcs21-ci]
+    outputs:
+      code: ${{ steps.diff.outputs.code }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Is this change documentation only?
+        id: diff
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          set -uo pipefail
+          # A pull_request run checks out the merge commit, whose first parent is the base.
+          # A push to main is compared with `deploy`, the last commit promote moved forward, and
+          # not with the previous push: a docs-only push can cancel the run of the code commit
+          # before it (cancel-in-progress), and comparing with that commit would skip the tests
+          # and leave the code never promoted. Against `deploy`, that code is still in the diff.
+          if [ "$EVENT" = pull_request ]; then
+            from="HEAD^1"
+          elif git fetch --no-tags --quiet origin deploy; then
+            from="FETCH_HEAD"
+          else
+            echo "No deploy branch to compare with; running every job."
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if ! changed="$(git diff --name-only "$from" HEAD)"; then
+            echo "Could not diff ${from}..HEAD; running every job."
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          # grep exits 1 when nothing matches, which is the usual case here; under the runner's
+          # `bash -e` that alone would fail the step, so the substitution never decides it.
+          code="$(printf '%s\n' "$changed" | grep -v '^$' | grep -Ev '\.md$' | grep -Ev '^docs/' ; \
+                  printf '%s\n' "$changed" | grep -E '^docs/crypto/')" || true
+          if [ -z "$changed" ] || [ -n "$code" ]; then
+            echo "code=true" >> "$GITHUB_OUTPUT"
+            echo "Code or test inputs changed; running every job."
+          else
+            echo "code=false" >> "$GITHUB_OUTPUT"
+            echo "Documentation only; the test jobs are skipped:"
+            printf '  %s\n' $changed
+          fi
+
+  backend:
+    name: backend
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: [self-hosted, mcs21-ci]
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: pip install uv
+
+      # Only the download cache is cached, never .venv itself: the venv is
+      # rebuilt fresh every run from the pinned requirements files, so it can
+      # never carry forward a stale build artifact or an accidentally-baked-in
+      # secret from a previous job.
+      - name: Cache uv download cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('backend/requirements.txt', 'backend/requirements-dev.txt') }}
+          restore-keys: |
+            uv-${{ runner.os }}-
+
+      - name: Create virtual environment
+        run: uv venv .venv
+
+      - name: Install dependencies
+        run: uv pip install --python .venv/bin/python -r requirements.txt -r requirements-dev.txt
+
+      # Looks every pinned and resolved dependency up in the PyPA advisory database. A new
+      # advisory fails the build until the package is upgraded or the finding is triaged.
+      - name: Audit Python dependencies for known vulnerabilities
+        run: |
+          uv pip install --python .venv/bin/python pip-audit
+          .venv/bin/pip-audit -r requirements.txt
+
+      - name: Ruff format check
+        run: .venv/bin/ruff format --check .
+
+      - name: Ruff lint
+        run: .venv/bin/ruff check .
+
+      # Deselects the "integration" marker: those tests need a real MySQL
+      # instance and are exercised separately by the mysql-gate job, which
+      # additionally fails if any of them report as skipped. Coverage is gated
+      # by `fail_under` in pyproject.toml.
+      - name: Backend tests (non-MySQL) with coverage
+        env:
+          SECRET_KEY: ci-backend-test-secret-key-at-least-32-chars
+          APP_ENV: test
+        run: >-
+          .venv/bin/python -m pytest -m "not integration"
+          --cov --cov-report=term --cov-report=xml:${{ runner.temp }}/reports/backend/coverage.xml
+          --junitxml=${{ runner.temp }}/reports/backend/junit.xml
+
+      # Reports are published only after a scan confirms they carry no keys,
+      # tokens, non-example addresses, or fixture plaintext.
+      - name: Check test reports before publishing
+        id: hygiene
+        if: always()
+        run: .venv/bin/python scripts/check_report_hygiene.py ${{ runner.temp }}/reports/backend
+
+      - name: Upload test reports
+        if: always() && steps.hygiene.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-reports
+          path: ${{ runner.temp }}/reports/backend
+          retention-days: 14
+
+  frontend:
+    name: frontend
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: [self-hosted, mcs21-ci]
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # Fails on any high or critical advisory in the full tree, dev tooling included, so a
+      # vulnerable axios cannot sit unnoticed in the lockfile again.
+      - name: Audit npm dependencies for known vulnerabilities
+        run: npm audit --audit-level=high
+
+      # The live-backend suites skip themselves here; the e2e-live job runs them
+      # un-skipped. Coverage thresholds live in vite.config.ts.
+      - name: Unit tests with coverage
+        run: >-
+          npm run test:coverage --
+          --reporter=default --reporter=junit
+          --outputFile.junit=${{ runner.temp }}/reports/frontend/junit.xml
+          --coverage.reportsDirectory=${{ runner.temp }}/reports/frontend/coverage
+
+      - name: Check test reports before publishing
+        id: hygiene
+        if: always()
+        run: python3 ../backend/scripts/check_report_hygiene.py ${{ runner.temp }}/reports/frontend
+
+      - name: Upload test reports
+        if: always() && steps.hygiene.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-test-reports
+          path: ${{ runner.temp }}/reports/frontend
+          retention-days: 14
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Production build
+        run: npm run build
+
+  mysql-gate:
+    name: mysql-gate
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: [self-hosted, mcs21-ci]
+    defaults:
+      run:
+        working-directory: backend
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.CI_MYSQL_ROOT_PASSWORD || 'ci-disposable-root-password' }}
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Cache uv download cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('backend/requirements.txt', 'backend/requirements-dev.txt') }}
+          restore-keys: |
+            uv-${{ runner.os }}-
+
+      - name: Create virtual environment
+        run: uv venv .venv
+
+      - name: Install dependencies
+        run: uv pip install --python .venv/bin/python -r requirements.txt -r requirements-dev.txt
+
+      - name: Install MySQL client tools
+        run: sudo apt-get update && sudo apt-get install -y --no-install-recommends mysql-client
+
+      # Every credential used from here on is masked as soon as it exists, so
+      # a stray `echo` or a tool's own error message cannot leak it into the
+      # job log. The password itself is generated per run, never a fixed
+      # secret, since this MySQL instance is destroyed at the end of the job.
+      - name: Generate and mask disposable credentials
+        id: creds
+        run: |
+          root_password="${{ secrets.CI_MYSQL_ROOT_PASSWORD || 'ci-disposable-root-password' }}"
+          runtime_password="$(openssl rand -hex 24)"
+          backup_password="$(openssl rand -hex 24)"
+          echo "::add-mask::${root_password}"
+          echo "::add-mask::${runtime_password}"
+          echo "::add-mask::${backup_password}"
+          {
+            echo "root_password=${root_password}"
+            echo "runtime_password=${runtime_password}"
+            echo "backup_password=${backup_password}"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Wait for MySQL and extract its CA certificate
+        env:
+          ROOT_PASSWORD: ${{ steps.creds.outputs.root_password }}
+        run: |
+          for _ in $(seq 1 30); do
+            mysqladmin ping --host=127.0.0.1 --port=3306 --user=root --password="$ROOT_PASSWORD" --silent && break
+            sleep 2
+          done
+          container_id="$(docker ps --filter "ancestor=mysql:8.4" --format '{{.ID}}' | head -n1)"
+          docker cp "${container_id}:/var/lib/mysql/ca.pem" "${RUNNER_TEMP}/mysql-ca.pem"
+
+      - name: Create the disposable release-gate database
+        env:
+          ROOT_PASSWORD: ${{ steps.creds.outputs.root_password }}
+        run: |
+          mysql --host=127.0.0.1 --port=3306 --user=root --password="$ROOT_PASSWORD" \
+            --execute "CREATE DATABASE IF NOT EXISTS fyp_secure_file_platform_test CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;"
+
+      - name: Run every migration 0001 through head, then alembic current/check
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: "3306"
+          DB_USER: root
+          DB_PASSWORD: ${{ steps.creds.outputs.root_password }}
+          DB_NAME: fyp_secure_file_platform_test
+          SECRET_KEY: ci-mysql-gate-test-secret-key-at-least-32-chars
+          APP_ENV: test
+        run: |
+          .venv/bin/python -m alembic upgrade head
+          .venv/bin/python -m alembic current
+          .venv/bin/python -m alembic check
+
+      - name: Verify the connection actually negotiated TLS
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: "3306"
+          DB_USER: root
+          DB_PASSWORD: ${{ steps.creds.outputs.root_password }}
+          DB_NAME: fyp_secure_file_platform_test
+          DB_SSL_CA: ${{ runner.temp }}/mysql-ca.pem
+        run: .venv/bin/python scripts/verify_mysql_tls.py
+
+      - name: Verify runtime and backup account grant boundaries
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: "3306"
+          DB_NAME: fyp_secure_file_platform_test
+          ADMIN_DB_USER: root
+          ADMIN_DB_PASSWORD: ${{ steps.creds.outputs.root_password }}
+          RUNTIME_DB_USER: fyp_gate_runtime_user
+          RUNTIME_DB_PASSWORD: ${{ steps.creds.outputs.runtime_password }}
+          RUNTIME_DB_HOST: "%"
+          BACKUP_DB_USER: fyp_gate_backup_user
+          BACKUP_DB_PASSWORD: ${{ steps.creds.outputs.backup_password }}
+          BACKUP_DB_HOST: "%"
+        run: .venv/bin/python scripts/check_runtime_grants.py
+
+      # -rs plus check_no_skips.py turns a silently-skipped integration suite
+      # (the default when AUTH_TEST_DATABASE_URL is unset, see
+      # tests/integration/conftest.py) into a hard CI failure instead of a
+      # quiet, meaningless pass. The whole suite runs here, unit tests included,
+      # so the coverage floor below measures everything the backend is tested by.
+      - name: Run the full backend suite against MySQL, with coverage
+        env:
+          AUTH_TEST_DATABASE_URL: mysql+pymysql://root:${{ steps.creds.outputs.root_password }}@127.0.0.1:3306/fyp_secure_file_platform_test
+          SECRET_KEY: ci-mysql-gate-test-secret-key-at-least-32-chars
+          APP_ENV: test
+        run: >-
+          .venv/bin/python -m pytest -rs
+          --cov --cov-fail-under=82 --cov-report=term
+          --cov-report=xml:${{ runner.temp }}/reports/mysql-gate/coverage.xml
+          --junitxml=${{ runner.temp }}/reports/mysql-gate/junit.xml
+
+      - name: Fail if any test was skipped
+        run: .venv/bin/python scripts/check_no_skips.py ${{ runner.temp }}/reports/mysql-gate/junit.xml
+
+      - name: Check test reports before publishing
+        id: hygiene
+        if: always()
+        run: .venv/bin/python scripts/check_report_hygiene.py ${{ runner.temp }}/reports/mysql-gate
+
+      - name: Upload test reports
+        if: always() && steps.hygiene.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mysql-gate-test-reports
+          path: ${{ runner.temp }}/reports/mysql-gate
+          retention-days: 14
+
+      - name: Non-empty refusal, resume, lock races, checksummed restore, rollback, partial DDL
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: "3306"
+          ADMIN_DB_USER: root
+          ADMIN_DB_PASSWORD: ${{ steps.creds.outputs.root_password }}
+          SECRET_KEY: ci-mysql-gate-test-secret-key-at-least-32-chars
+          APP_ENV: test
+          PYTHON_BIN: ${{ github.workspace }}/backend/.venv/bin/python
+        run: bash scripts/mysql_release_gate.sh
+
+      # Generates a throwaway backup keypair and backup account inside the job; neither the
+      # private key nor any password is ever echoed. The report holds only ids, counts, and
+      # timings, and is kept as restore evidence.
+      - name: Encrypted backup, clean restore, and refusal drill
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: "3306"
+          ADMIN_DB_USER: root
+          ADMIN_DB_PASSWORD: ${{ steps.creds.outputs.root_password }}
+          SECRET_KEY: ci-mysql-gate-test-secret-key-at-least-32-chars
+          APP_ENV: test
+          DRILL_REPORT: ${{ runner.temp }}/restore-drill-report.json
+        run: bash scripts/backup_restore_drill.sh
+
+      - name: Keep the restore drill report
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: restore-drill-report
+          path: ${{ runner.temp }}/restore-drill-report.json
+          retention-days: 90
+  # The frontend's live-backend suites -- the whole MVP, from registration to account
+  # deletion -- against a real API process and a disposable MySQL, with nothing skipped,
+  # then a Chromium smoke test that clicks the built pages through the golden path against
+  # the same stack. backend/tests/e2e/run_live_stack.sh does the work so a developer can
+  # run the same thing locally; see docs/E2E_TESTING.md.
+  e2e-live:
+    name: e2e-live
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: [self-hosted, mcs21-ci]
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: ${{ secrets.CI_MYSQL_ROOT_PASSWORD || 'ci-disposable-root-password' }}
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping --silent"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=20
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install uv
+        run: pip install uv
+
+      - name: Cache uv download cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/uv
+          key: uv-${{ runner.os }}-${{ hashFiles('backend/requirements.txt', 'backend/requirements-dev.txt') }}
+          restore-keys: |
+            uv-${{ runner.os }}-
+
+      - name: Install backend dependencies
+        working-directory: backend
+        run: |
+          uv venv .venv
+          uv pip install --python .venv/bin/python -r requirements.txt -r requirements-dev.txt
+
+      - name: Install frontend dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Read the Playwright version
+        id: playwright
+        working-directory: frontend
+        run: echo "version=$(node -p "require('@playwright/test/package.json').version")" >> "$GITHUB_OUTPUT"
+
+      # Only the browser download is cached, keyed on the exact Playwright release that
+      # drives it, so an upgrade can never run against a stale browser build. The system
+      # libraries Chromium needs come from apt on every run.
+      - name: Cache the Chromium download
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-chromium-${{ runner.os }}-${{ steps.playwright.outputs.version }}
+
+      - name: Install Chromium and its system dependencies
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: Mask the disposable root password
+        id: creds
+        run: |
+          root_password="${{ secrets.CI_MYSQL_ROOT_PASSWORD || 'ci-disposable-root-password' }}"
+          echo "::add-mask::${root_password}"
+          echo "root_password=${root_password}" >> "$GITHUB_OUTPUT"
+
+      - name: Create the disposable database
+        working-directory: backend
+        env:
+          ROOT_PASSWORD: ${{ steps.creds.outputs.root_password }}
+        run: |
+          .venv/bin/python - <<'PY'
+          import os, time
+          import pymysql
+          for _ in range(30):
+              try:
+                  connection = pymysql.connect(
+                      host="127.0.0.1", port=3306, user="root", password=os.environ["ROOT_PASSWORD"]
+                  )
+                  break
+              except pymysql.err.OperationalError:
+                  time.sleep(2)
+          else:
+              raise SystemExit("MySQL did not come up")
+          with connection.cursor() as cursor:
+              cursor.execute(
+                  "CREATE DATABASE IF NOT EXISTS fyp_e2e_test "
+                  "CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci"
+              )
+          PY
+
+      # E2E_BROWSER=1 adds the Chromium smoke test after the Node suites pass. It runs with
+      # no retries, fails on a flaky pass, and check_no_skips.py reads its JUnit report too.
+      - name: Run every live-backend suite, un-skipped, with coverage, then the browser
+        env:
+          DB_HOST: 127.0.0.1
+          DB_PORT: "3306"
+          DB_USER: root
+          DB_PASSWORD: ${{ steps.creds.outputs.root_password }}
+          DB_NAME: fyp_e2e_test
+          E2E_COVERAGE: "1"
+          E2E_REPORT_DIR: ${{ runner.temp }}/reports/e2e-live
+          E2E_BROWSER: "1"
+          E2E_BROWSER_REPORT_DIR: ${{ runner.temp }}/reports/e2e-browser
+        run: bash backend/tests/e2e/run_live_stack.sh
+
+      - name: Check test reports before publishing
+        id: hygiene
+        if: always()
+        run: python3 backend/scripts/check_report_hygiene.py ${{ runner.temp }}/reports/e2e-live
+
+      - name: Upload test reports
+        if: always() && steps.hygiene.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-live-test-reports
+          path: ${{ runner.temp }}/reports/e2e-live
+          retention-days: 14
+
+      # The browser report is published only when something failed, and only after the same
+      # scan, which also unpacks the report's embedded results and refuses any Playwright
+      # trace. CI records no traces; the report holds failure screenshots (key material
+      # masked) and the steps, including values typed into the throwaway accounts.
+      - name: Check the browser report before publishing
+        id: browser-hygiene
+        if: failure()
+        run: python3 backend/scripts/check_report_hygiene.py ${{ runner.temp }}/reports/e2e-browser/html
+
+      - name: Upload the browser report (failures only)
+        if: failure() && steps.browser-hygiene.outcome == 'success'
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-browser-report
+          path: ${{ runner.temp }}/reports/e2e-browser/html
+          retention-days: 14
+
+  # A same-host attacker container mutates only a disposable encrypted-object volume and
+  # `_test` database. It has no host network, Docker socket, production secret, or production
+  # mount. The report proves the visible integrity states and the SHA-256/AEAD trust boundary.
+  tamper-drill:
+    name: tamper-drill
+    needs: changes
+    if: needs.changes.outputs.code == 'true'
+    runs-on: [self-hosted, mcs21-ci]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run the isolated ciphertext tamper drill
+        env:
+          REPORT_DIR: ${{ runner.temp }}/reports/tamper-drill
+        run: bash security-lab/run.sh
+
+      - name: Check the sanitized report before publishing
+        if: always()
+        run: python3 backend/scripts/check_report_hygiene.py ${{ runner.temp }}/reports/tamper-drill
+
+      - name: Keep the tamper-drill evidence
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: tamper-drill-report
+          path: ${{ runner.temp }}/reports/tamper-drill
+          retention-days: 90
+
+  # Marks a commit of `main` as safe to deploy, but only once every job above has passed on
+  # it. The staging server deploys the `deploy` branch, never `main` itself
+  # (deployment/server/mcs21-auto-deploy), so a direct push or a merge that breaks CI is not
+  # shipped. The branch only ever moves forward: a slower run for an older commit cannot pull
+  # it back. The server holds no GitHub credential beyond its read-only Deploy Key, and this
+  # job holds no server credential; it only writes a ref.
+  #
+  # The ref is moved through the REST API rather than `git push`: GITHUB_TOKEN may not push
+  # commits that change files under .github/workflows, and this very file is one.
+  promote:
+    name: promote
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: [changes, backend, frontend, mysql-gate, e2e-live, tamper-drill]
+    runs-on: [self-hosted, mcs21-ci]
+    permissions:
+      contents: write
+    concurrency:
+      group: promote-deploy
+      cancel-in-progress: false
+    steps:
+      - name: Fast-forward the deploy branch to this commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          if current="$(gh api "repos/${REPO}/git/ref/heads/deploy" --jq .object.sha 2>/dev/null)"; then
+            relation="$(gh api "repos/${REPO}/compare/${current}...${GITHUB_SHA}" --jq .status)"
+            case "$relation" in
+              identical|behind)
+                echo "deploy (${current}) already contains ${GITHUB_SHA}; nothing to promote."
+                ;;
+              ahead)
+                gh api --method PATCH "repos/${REPO}/git/refs/heads/deploy" \
+                  -f sha="${GITHUB_SHA}" -F force=false --jq .object.sha
+                echo "Promoted ${GITHUB_SHA}."
+                ;;
+              *)
+                echo "::error::deploy (${current}) and ${GITHUB_SHA} have diverged (${relation}); refusing to move it."
+                exit 1
+                ;;
+            esac
+          else
+            gh api --method POST "repos/${REPO}/git/refs" \
+              -f ref=refs/heads/deploy -f sha="${GITHUB_SHA}" --jq .ref
+            echo "Created deploy at ${GITHUB_SHA}."
+          fi

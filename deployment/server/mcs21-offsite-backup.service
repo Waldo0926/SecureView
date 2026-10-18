@@ -1,0 +1,48 @@
+# Not installed by the deploy tooling (issue #56). Install deliberately, after
+# database/mysql/04-backup-account.sql has created the backup account and the backup
+# public key has been placed on the host -- see docs/BACKUP_AND_RECOVERY.md.
+#
+#   sudo cp deployment/server/mcs21-offsite-backup.{service,timer} /etc/systemd/system/
+#   sudo systemctl daemon-reload
+#   sudo systemctl start mcs21-offsite-backup.service     # one run by hand first; read the journal
+#   sudo systemctl enable --now mcs21-offsite-backup.timer
+#
+# /etc/fyp-secure-file-platform/backup.env (0600, root) holds only BACKUP_DB_HOST,
+# BACKUP_DB_PORT, BACKUP_DB_USER, BACKUP_DB_PASSWORD, BACKUP_DB_SSL_CA, BACKUP_OBJECTS_DIR
+# and BACKUP_DEST -- never the application's backend.env, so this job cannot read the
+# app's SECRET_KEY or runtime DB password. BACKUP_OBJECTS_DIR must be the same directory
+# as the app's ENCRYPTED_FILE_DIR on that host; confirm it before enabling the timer.
+# The host holds the backup PUBLIC key only; the private key stays offline.
+
+[Unit]
+Description=Encrypted off-server backup of MCS21 metadata and ciphertext objects
+Wants=network-online.target
+After=network-online.target docker.service
+# Email on failure through mcs21-alert@.service (issue #57; docs/RECONCILIATION_RUNBOOK.md).
+OnFailure=mcs21-alert@%n.service
+
+[Service]
+Type=oneshot
+User=fypapp
+Group=fypapp
+WorkingDirectory=/opt/mcs21/current/backend
+EnvironmentFile=/etc/fyp-secure-file-platform/backup.env
+ExecStart=/opt/mcs21/current/backend/.venv/bin/python scripts/backup_encrypted.py \
+    --public-key /etc/fyp-secure-file-platform/backup_pub.pem \
+    --objects-dir ${BACKUP_OBJECTS_DIR} \
+    --dest ${BACKUP_DEST}
+# A daily set is complete or the unit fails: systemctl --failed and the journal show the
+# single "backup_encrypted: FAILED -- ..." line. Check freshness from anywhere with
+#   scripts/backup_encrypted.py --check-freshness <dest> --max-age-hours 26
+TimeoutStartSec=2h
+Nice=10
+IOSchedulingClass=idle
+
+# Reads the object store and the database; writes only its private temp directory
+# (ProtectSystem=strict leaves every other path read-only).
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=read-only
+# If BACKUP_DEST is a mounted directory rather than user@host:/path or s3://, add it here:
+# ReadWritePaths=/mnt/offsite-backups

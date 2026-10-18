@@ -1,0 +1,13 @@
+[Unit]
+Description=MCS21 security agent check, daily
+
+[Timer]
+# 06:00, after the 05:30 integrity sweep, so a file the sweep has just found damaged is in the
+# same morning's report, and before people start the working day.
+OnCalendar=*-*-* 06:00:00 Asia/Kuala_Lumpur
+Persistent=true
+AccuracySec=1m
+Unit=mcs21-security-agent.service
+
+[Install]
+WantedBy=timers.target

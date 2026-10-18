@@ -1,0 +1,37 @@
+# Issue #59: sample loopback-only metrics and turn threshold crossings into one actionable
+# systemd failure. Install deliberately; see docs/OBSERVABILITY_AND_INCIDENT_RESPONSE.md.
+
+[Unit]
+Description=SecureView redacted runtime metrics and alert thresholds
+Wants=network-online.target
+After=network-online.target fyp-backend.service
+OnFailure=mcs21-alert@%n.service
+
+[Service]
+Type=oneshot
+User=fypapp
+Group=fypapp
+WorkingDirectory=/opt/mcs21/current/backend
+StateDirectory=mcs21-observe
+StateDirectoryMode=0750
+ExecStart=/opt/mcs21/current/backend/.venv/bin/python scripts/observe_runtime.py \
+    --state-file /var/lib/mcs21-observe/state.json \
+    --disk-path /var/lib/fyp-secure-file-platform \
+    --checkpoint-stamp /var/lib/mcs21-observe/audit-checkpoint.latest \
+    --max-auth-rate-limited 5 \
+    --max-auth-failures 50 \
+    --max-storage-failures 3 \
+    --max-integrity-failures 3 \
+    --max-unhandled-errors 3 \
+    --max-disk-percent 85 \
+    --max-checkpoint-age-seconds 7200
+
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ProtectKernelTunables=true
+ProtectKernelModules=true
+ProtectControlGroups=true
+RestrictSUIDSGID=true
+LockPersonality=true

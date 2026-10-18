@@ -1,0 +1,12 @@
+[Unit]
+Description=Run SecureView observability checks every five minutes
+
+[Timer]
+OnCalendar=*:0/5
+AccuracySec=30s
+RandomizedDelaySec=15s
+Persistent=true
+Unit=mcs21-observe.service
+
+[Install]
+WantedBy=timers.target

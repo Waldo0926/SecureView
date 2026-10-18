@@ -1,0 +1,187 @@
+{
+  "scenario": "smoke",
+  "config": {
+    "base_url": "https://secureview.tech/api/v1",
+    "timeout": 600.0,
+    "algorithm": "AES-256-GCM",
+    "login_concurrency": 2,
+    "insecure": false,
+    "confirm_remote": true,
+    "scenario": "smoke",
+    "size": 1048576
+  },
+  "started_utc": 1791554572.480545,
+  "ended_utc": 1791554574.0362399,
+  "login": {
+    "count": 2,
+    "ok": 2,
+    "error_rate": 0.0,
+    "errors": {},
+    "request_ms": {
+      "p50": 290.2,
+      "p95": 362.8,
+      "p99": 362.8,
+      "max": 362.8,
+      "mean": 326.5
+    },
+    "crypto_ms": {
+      "p50": null,
+      "p95": null,
+      "p99": null,
+      "max": null,
+      "mean": null
+    },
+    "ops_per_s": 2.0,
+    "mib_per_s": 0.0,
+    "wire_mib_per_s_p50": null,
+    "verified": 0,
+    "verify_failed": 0
+  },
+  "steps": [
+    {
+      "label": "1MiB",
+      "params": {
+        "size": "1MiB",
+        "types": [
+          "pdf"
+        ],
+        "repeat": 1
+      },
+      "started_utc": 1791554573.116148,
+      "ended_utc": 1791554574.0350058,
+      "results": {
+        "delete": {
+          "count": 1,
+          "ok": 1,
+          "error_rate": 0.0,
+          "errors": {},
+          "request_ms": {
+            "p50": 27.7,
+            "p95": 27.7,
+            "p99": 27.7,
+            "max": 27.7,
+            "mean": 27.7
+          },
+          "crypto_ms": {
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null,
+            "mean": null
+          },
+          "ops_per_s": 1.09,
+          "mib_per_s": 0.0,
+          "wire_mib_per_s_p50": null,
+          "verified": 0,
+          "verify_failed": 0
+        },
+        "download": {
+          "count": 1,
+          "ok": 1,
+          "error_rate": 0.0,
+          "errors": {},
+          "request_ms": {
+            "p50": 96.2,
+            "p95": 96.2,
+            "p99": 96.2,
+            "max": 96.2,
+            "mean": 96.2
+          },
+          "crypto_ms": {
+            "p50": 8.5,
+            "p95": 8.5,
+            "p99": 8.5,
+            "max": 8.5,
+            "mean": 8.5
+          },
+          "ops_per_s": 1.09,
+          "mib_per_s": 1.09,
+          "wire_mib_per_s_p50": 10.4,
+          "verified": 1,
+          "verify_failed": 0
+        },
+        "recipient_download": {
+          "count": 1,
+          "ok": 1,
+          "error_rate": 0.0,
+          "errors": {},
+          "request_ms": {
+            "p50": 89.3,
+            "p95": 89.3,
+            "p99": 89.3,
+            "max": 89.3,
+            "mean": 89.3
+          },
+          "crypto_ms": {
+            "p50": 13.6,
+            "p95": 13.6,
+            "p99": 13.6,
+            "max": 13.6,
+            "mean": 13.6
+          },
+          "ops_per_s": 1.09,
+          "mib_per_s": 1.09,
+          "wire_mib_per_s_p50": 11.2,
+          "verified": 1,
+          "verify_failed": 0
+        },
+        "share": {
+          "count": 1,
+          "ok": 1,
+          "error_rate": 0.0,
+          "errors": {},
+          "request_ms": {
+            "p50": 431.0,
+            "p95": 431.0,
+            "p99": 431.0,
+            "max": 431.0,
+            "mean": 431.0
+          },
+          "crypto_ms": {
+            "p50": null,
+            "p95": null,
+            "p99": null,
+            "max": null,
+            "mean": null
+          },
+          "ops_per_s": 1.09,
+          "mib_per_s": 0.0,
+          "wire_mib_per_s_p50": null,
+          "verified": 0,
+          "verify_failed": 0
+        },
+        "upload": {
+          "count": 1,
+          "ok": 1,
+          "error_rate": 0.0,
+          "errors": {},
+          "request_ms": {
+            "p50": 237.5,
+            "p95": 237.5,
+            "p99": 237.5,
+            "max": 237.5,
+            "mean": 237.5
+          },
+          "crypto_ms": {
+            "p50": 5.6,
+            "p95": 5.6,
+            "p99": 5.6,
+            "max": 5.6,
+            "mean": 5.6
+          },
+          "ops_per_s": 1.09,
+          "mib_per_s": 1.09,
+          "wire_mib_per_s_p50": 4.2,
+          "verified": 0,
+          "verify_failed": 0
+        },
+        "_all": {
+          "count": 5,
+          "failed": 0,
+          "error_rate": 0.0,
+          "duration_s": 0.9
+        }
+      }
+    }
+  ]
+}
