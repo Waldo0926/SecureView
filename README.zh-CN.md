@@ -13,7 +13,7 @@
 ![Vue 3](https://img.shields.io/badge/Vue_3-TypeScript-42b883?logo=vuedotjs&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Python-009688?logo=fastapi&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8.4-4479a1?logo=mysql&logoColor=white)
-![Tests](https://img.shields.io/badge/Tests-pytest,_Vitest,_Playwright-2ead33?logo=playwright&logoColor=white)
+[![Tests](https://github.com/Waldo0926/SecureView/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/Waldo0926/SecureView/actions/workflows/tests.yml)
 
 **2026年10月18日与团队仓库同步（团队提交 `16d41ba`）。**
 
@@ -201,7 +201,8 @@ SecureView 是已经上线运行的**大学团队项目**，安全性**没有经
 | [deployment/server/](deployment/server/) | Nginx配置、systemd单元、部署、备份和告警脚本 |
 | [loadtest/](loadtest/) | 容量测试用的压测工具 |
 | [security-lab/](security-lab/) | 隔离环境里的密文篡改演练 |
-| [ci/](ci/) | 团队的GitHub Actions工作流，仅作参考 |
+| [.github/workflows/](.github/workflows/) | 本仓库每次推送都会跑的测试：后端单元测试、前端测试、MySQL发布门禁 |
+| [ci/](ci/) | 团队完整的GitHub Actions工作流，仅作参考 |
 | [docs/](docs/README.md) | 设计、安全、测试和运维文档，测试报告和扫描结果 |
 | [changelog/](changelog/CHANGELOG.md) | 完整的工程变更记录 |
 
@@ -220,6 +221,8 @@ SecureView 是已经上线运行的**大学团队项目**，安全性**没有经
 这是四人团队仓库的一份快照，作为一个提交发布。提交历史和PR留在团队仓库里，所以这里的git blame看不出每个文件是谁写的。我做的部分见[我的贡献](#我的贡献)。
 
 发布前去掉了：测试账号密码、CI runner的主机配置、服务器公网IP和备份桶名。
+
+后端单元测试、前端测试和MySQL 8.4发布门禁在本仓库也会跑，用的是GitHub托管的runner（`.github/workflows/tests.yml`），所以顶部的徽章反映的是这份代码本身。线上端到端测试和篡改演练需要已去掉的测试账号，这里不跑。
 
 代码公开是为了让人看，不是开源项目：复制、修改、部署或再使用都需要书面许可，见 [LICENSE](LICENSE)。
 

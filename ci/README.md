@@ -1,6 +1,6 @@
 # CI workflow
 
-`ci.yml` is the GitHub Actions workflow from the team repository. It ran on the team's self-hosted runners, so it is kept here for reference and does not run in this repository.
+`ci.yml` is the GitHub Actions workflow from the team repository. It ran on the team's self-hosted runners, so it is kept here for reference and does not run in this repository. Three of its jobs (`backend`, `frontend`, `mysql-gate`) run here on GitHub-hosted runners from [.github/workflows/tests.yml](../.github/workflows/tests.yml).
 
 Jobs:
 

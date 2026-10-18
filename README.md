@@ -13,7 +13,7 @@
 ![Vue 3](https://img.shields.io/badge/Vue_3-TypeScript-42b883?logo=vuedotjs&logoColor=white)
 ![FastAPI](https://img.shields.io/badge/FastAPI-Python-009688?logo=fastapi&logoColor=white)
 ![MySQL](https://img.shields.io/badge/MySQL-8.4-4479a1?logo=mysql&logoColor=white)
-![Tests](https://img.shields.io/badge/Tests-pytest,_Vitest,_Playwright-2ead33?logo=playwright&logoColor=white)
+[![Tests](https://github.com/Waldo0926/SecureView/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/Waldo0926/SecureView/actions/workflows/tests.yml)
 
 **Synced with the team repository on 18 October 2026 (team commit `16d41ba`).**
 
@@ -201,7 +201,8 @@ More detail: **[docs/TESTING_AND_PERFORMANCE.md](docs/TESTING_AND_PERFORMANCE.md
 | [deployment/server/](deployment/server/) | Nginx config, systemd units, deploy, backup and alert scripts |
 | [loadtest/](loadtest/) | The load test tool used for the capacity studies |
 | [security-lab/](security-lab/) | Isolated ciphertext tamper drill |
-| [ci/](ci/) | The team's GitHub Actions workflow, kept for reference |
+| [.github/workflows/](.github/workflows/) | The tests that run in this repository on every push: backend unit tests, frontend tests, MySQL release gate |
+| [ci/](ci/) | The team's full GitHub Actions workflow, kept for reference |
 | [docs/](docs/README.md) | Design, security, testing and operations documents, test reports and scan results |
 | [changelog/](changelog/CHANGELOG.md) | Full engineering changelog |
 
@@ -220,6 +221,8 @@ How the team ran it locally is in **[docs/DEVELOPER_GUIDE.md](docs/DEVELOPER_GUI
 This is a snapshot of the four-person team repository, published as one commit. The commit history and pull requests stay in the team repository, so git blame here does not show who wrote each file. My share of the work is listed in [My Contributions](#my-contributions).
 
 Removed before publishing: test account passwords, the CI runner host setup, and the server's public IP and backup bucket name.
+
+The backend unit tests, the frontend tests and the MySQL 8.4 release gate run in this repository too, on GitHub-hosted runners (`.github/workflows/tests.yml`), so the badge at the top reflects this copy of the code. The live end-to-end job and the tamper drill need the removed test accounts and are not run here.
 
 The code is shared so reviewers can read it. It is not open source: copying, modifying, deploying or reusing it needs written permission. See [LICENSE](LICENSE).
 
