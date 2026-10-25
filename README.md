@@ -7,6 +7,7 @@
 [![Live Site](https://img.shields.io/badge/Live_Site-secureview.tech-2563eb?style=for-the-badge&logo=googlechrome&logoColor=white)](https://secureview.tech)
 [![API Docs](https://img.shields.io/badge/API-Swagger_UI-85ea2d?style=for-the-badge&logo=swagger&logoColor=black)](https://secureview.tech/docs)
 [![Status](https://img.shields.io/badge/Status-In_Production-16a34a?style=for-the-badge)](#features)
+[![Uptime](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FWaldo0926%2Fuptime%2FHEAD%2Fapi%2Fsecureview%2Fuptime.json&style=for-the-badge)](https://waldo0926.github.io/uptime/history/secureview)
 [![Source](https://img.shields.io/badge/Source-View_Only-475569?style=for-the-badge)](#about-this-copy)
 [![License](https://img.shields.io/badge/License-All_Rights_Reserved-dc2626?style=for-the-badge)](LICENSE)
 
