@@ -7,6 +7,7 @@
 [![在线站点](https://img.shields.io/badge/在线站点-secureview.tech-2563eb?style=for-the-badge&logo=googlechrome&logoColor=white)](https://secureview.tech)
 [![API 文档](https://img.shields.io/badge/API-Swagger_UI-85ea2d?style=for-the-badge&logo=swagger&logoColor=black)](https://secureview.tech/docs)
 [![状态](https://img.shields.io/badge/状态-已上线运行-16a34a?style=for-the-badge)](#功能)
+[![在线率](https://img.shields.io/endpoint?url=https%3A%2F%2Fraw.githubusercontent.com%2FWaldo0926%2Fuptime%2FHEAD%2Fapi%2Fsecureview%2Fuptime.json&style=for-the-badge)](https://waldo0926.github.io/uptime/history/secureview)
 [![源码](https://img.shields.io/badge/源码-仅供查看-475569?style=for-the-badge)](#关于这份副本)
 [![许可证](https://img.shields.io/badge/许可证-保留所有权利-dc2626?style=for-the-badge)](LICENSE)
 
