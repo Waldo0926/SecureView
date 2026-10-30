@@ -35,7 +35,7 @@ class KeyRepository:
             .limit(1)
             .execution_options(populate_existing=True)
         ).one_or_none()
-        return None if row is None else row._tuple()
+        return None if row is None else tuple(row)
 
     def get_owned_key_bundle(
         self,
@@ -57,7 +57,7 @@ class KeyRepository:
             .limit(1)
             .execution_options(populate_existing=True)
         ).one_or_none()
-        return None if row is None else row._tuple()
+        return None if row is None else tuple(row)
 
     def get_active_public_key_by_user_uuid(
         self,
@@ -75,7 +75,7 @@ class KeyRepository:
             .limit(1)
             .execution_options(populate_existing=True)
         ).one_or_none()
-        return None if row is None else row._tuple()
+        return None if row is None else tuple(row)
 
     def get_active_public_key_by_identifier(
         self,
@@ -104,7 +104,7 @@ class KeyRepository:
             .limit(1)
             .execution_options(populate_existing=True)
         ).one_or_none()
-        return None if row is None else row._tuple()
+        return None if row is None else tuple(row)
 
     def lock_protection_profile(self, user_id: int) -> UserKeyProtectionProfile | None:
         return self.db.scalar(

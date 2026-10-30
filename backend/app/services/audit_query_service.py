@@ -89,12 +89,12 @@ class AuditQueryService:
         }
         return self.repository.file_labels(ids)
 
-    def verify_chain(self, *, actor: ActorContext) -> dict[str, int | bool | None | str]:
+    def verify_chain(self, *, actor: ActorContext) -> dict[str, int | bool | str | None]:
         if actor.role is not SystemRole.ADMIN:
             raise AuthorizationError()
         return self._verify_chain()
 
-    def verify_chain_for_trusted_job(self) -> dict[str, int | bool | None | str]:
+    def verify_chain_for_trusted_job(self) -> dict[str, int | bool | str | None]:
         """Verify the chain with no signed-in actor, for a server-side job run by the operator.
 
         Only scripts started on the server call this (the daily security-agent check). No HTTP
@@ -104,7 +104,7 @@ class AuditQueryService:
         """
         return self._verify_chain()
 
-    def _verify_chain(self) -> dict[str, int | bool | None | str]:
+    def _verify_chain(self) -> dict[str, int | bool | str | None]:
         logs, head = self.repository.chain_rows()
         previous_hash = self.audit_log_service.GENESIS_HASH
         for position, log in enumerate(logs, start=1):

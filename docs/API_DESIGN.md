@@ -23,7 +23,7 @@ Unversioned operational endpoints are:
 
 | Method | Endpoint | Description |
 |---|---|---|
-| GET | `/health/live` | Process liveness; does not check dependencies |
+| GET | `/health/live` | Process liveness and the running `commit` (null when unknown); does not check dependencies |
 | GET | `/health/ready` | Database connectivity and exact application schema-revision marker |
 
 ## Response, Authentication, and Error Contract

@@ -2,6 +2,15 @@
 
 This is a short list of the main milestones. The full engineering changelog is in [changelog/CHANGELOG.md](changelog/CHANGELOG.md).
 
+## 2026-10-30
+
+### Synced with the team repository up to `051cc8e`
+
+- Deploys now check the commit the live backend reports on `/health/live` and roll back if it is not the one just deployed (team #243).
+- The first monthly dependency updates for the backend, frontend, Docker images and GitHub Actions (team #244 to #247, #251).
+- Photos for the four team members on Contact us, with the stickers centred (team #248, #249).
+- Took out the sshd forwarding rules and user names from the load test guide, and replaced the Docker gateway address with a placeholder.
+
 ## 2026-10-18
 
 ### Source published

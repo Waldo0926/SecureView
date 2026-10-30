@@ -358,8 +358,8 @@ bash scripts/mysql_release_gate.sh              # 锁竞争、带校验和的恢
 
 ## Staging 安装记录（2026-09-24）
 
-- 备份账号 `fyp_backup_user@172.29.21.1`，由 `04-backup-account.sql` 改 host 后创建：MySQL 运行在 Docker
-  中，主机发起的 TCP 连接来自 Docker 网关 `172.29.21.1`（与 staging 上其他账号相同），`localhost` 账号无法
+- 备份账号 `fyp_backup_user@<docker-gateway>`，由 `04-backup-account.sql` 改 host 后创建：MySQL 运行在 Docker
+  中，主机发起的 TCP 连接来自 Docker 网关 `<docker-gateway>`（与 staging 上其他账号相同），`localhost` 账号无法
   登录。已以 `fypapp` 身份验证：走 TLS（`TLS_AES_256_GCM_SHA384`）、可读、`DELETE` 被拒绝。
 - `/etc/fyp-secure-file-platform/backup.env`（root，0600）与 `backup_pub.pem`（root:fypapp，0640；公钥
   SHA-256 为 `4ac77119…`，与每个备份集 `index.json` 中记录的一致）。

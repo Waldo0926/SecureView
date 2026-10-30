@@ -1,5 +1,5 @@
 /**
- * The Contact us page: supervisor, team and feedback form render, the supervisor's photo
+ * The Contact us page: supervisor, team and feedback form render, every photo
  * actually loads (the site's CSP only allows images from its own origin, so a hot-linked
  * photo would silently fail), the Monash profile link is right, and a phone does not scroll
  * sideways. Needs no account.
@@ -80,6 +80,11 @@ test('the team page shows the supervisor, the four members and the feedback form
     await expect(card.getByTestId('member-github')).toHaveAttribute('href', github)
     await expect(card.getByTestId('member-github')).toHaveAttribute('rel', /noopener/)
     await expect(card.getByTestId('member-email')).toHaveAttribute('href', `mailto:${email}`)
+    const memberPhoto = card.getByAltText(`Portrait of ${name}`)
+    await memberPhoto.scrollIntoViewIfNeeded()
+    await expect
+      .poll(() => memberPhoto.evaluate((img: HTMLImageElement) => img.complete && img.naturalWidth > 0))
+      .toBe(true)
   }
 })
 

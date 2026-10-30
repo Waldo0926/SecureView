@@ -1,5 +1,7 @@
+import re
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI, status
 from fastapi.middleware.cors import CORSMiddleware
@@ -9,7 +11,7 @@ from sqlalchemy import text
 from app.api.body_limit import RequestBodyLimitMiddleware
 from app.api.error_handlers import register_exception_handlers
 from app.api.v1.router import api_router
-from app.core.config import Settings, settings
+from app.core.config import REPO_ROOT, Settings, settings
 from app.core.database import (
     create_db_engine,
     create_session_factory,
@@ -23,6 +25,23 @@ from app.core.observability import (
     configure_event_logger,
 )
 from app.core.security import PasswordManager
+
+RELEASE_IDENTITY_FILE = REPO_ROOT / ".mcs21-release"
+_COMMIT_PATTERN = re.compile(r"[0-9a-f]{7,40}")
+
+
+def resolve_commit(
+    app_settings: Settings, identity_file: Path = RELEASE_IDENTITY_FILE
+) -> str | None:
+    """Return the running commit SHA, or None when it is not known (local development)."""
+    value = app_settings.APP_COMMIT
+    if not value:
+        try:
+            value = identity_file.read_text(encoding="utf-8")
+        except OSError:
+            return None
+    value = value.strip().lower()
+    return value if _COMMIT_PATTERN.fullmatch(value) else None
 
 
 @asynccontextmanager
@@ -98,9 +117,12 @@ def create_app(app_settings: Settings | None = None) -> FastAPI:
             "docs": "/docs",
         }
 
+    commit = resolve_commit(active_settings)
+
     @application.get("/health/live", tags=["Health"])
     def liveness():
-        return {"status": "ok"}
+        # mcs21-deploy compares this with the commit it just deployed.
+        return {"status": "ok", "commit": commit}
 
     @application.get("/health/ready", tags=["Health"])
     def readiness():

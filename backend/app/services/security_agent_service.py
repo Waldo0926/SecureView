@@ -132,7 +132,7 @@ class SecurityAgentService:
         self,
         *,
         window_hours: int,
-        verify_chain: Callable[[], dict[str, int | bool | None | str]],
+        verify_chain: Callable[[], dict[str, int | bool | str | None]],
     ) -> AgentReportOut:
         now = self.clock()
         window = timedelta(hours=window_hours)

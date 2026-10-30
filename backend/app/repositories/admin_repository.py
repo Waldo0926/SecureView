@@ -82,7 +82,7 @@ class AdminRepository:
         rows = self.db.execute(
             statement.order_by(File.created_at.desc(), File.id.desc()).offset(offset).limit(limit)
         )
-        return [row._tuple() for row in rows]
+        return [tuple(row) for row in rows]
 
     # --- dashboard counts -------------------------------------------------------------------
     # Every method below is a single aggregate query that returns numbers, never rows, so the

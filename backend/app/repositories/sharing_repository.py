@@ -69,7 +69,7 @@ class SharingRepository:
             .with_for_update()
             .execution_options(populate_existing=True)
         ).one_or_none()
-        return None if row is None else row._tuple()
+        return None if row is None else tuple(row)
 
     def get_user_by_uuid(self, user_uuid: UUID) -> User | None:
         return self.db.scalar(select(User).where(User.user_uuid == str(user_uuid)).limit(1))
@@ -140,4 +140,4 @@ class SharingRepository:
             .order_by(User.username.asc(), User.id.asc())
             .limit(limit)
         )
-        return [row._tuple() for row in rows]
+        return [tuple(row) for row in rows]

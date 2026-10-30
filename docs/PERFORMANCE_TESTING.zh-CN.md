@@ -67,15 +67,7 @@ PR #210 之后入口限制是每秒 30 个请求（突发 60），所以经公�
 
 在 VPS 本机上跑压测工具虽然没有网络瓶颈，但会抢占被测服务器的 CPU，所以不推荐。
 
-**隧道需要 sshd 例外。** 服务器的 sshd 设置了 `AllowTcpForwarding no`，唯一的例外（`Match User jason,junyan,charter`）只放行
-`127.0.0.1:3306`，所以上面的隧道能在本地开出端口，但每个请求都会被重置。2026-10-03 那次测试临时在 `/etc/ssh/sshd_config`
-末尾加了一个只针对 root 的块（先备份，`sshd -t` 检查，`systemctl reload ssh` 生效），测完用备份还原：
-
-```text
-Match User root
-    AllowTcpForwarding local
-    PermitOpen 127.0.0.1:8000
-```
+**隧道需要 sshd 例外。** 服务器默认关闭端口转发，所以上面的隧道能在本地开出端口，但每个请求都会被重置。2026-10-03 那次测试临时在 sshd 配置里加了一个只放行 `127.0.0.1:8000` 的转发例外，测完已撤销。具体的服务器配置不放在这个公开副本里。
 
 长时间测试时给隧道加上 `-o ServerAliveInterval=15`。
 

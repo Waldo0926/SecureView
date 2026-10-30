@@ -23,6 +23,9 @@ MCS21 预发布 VPS 会在新提交合并到 GitHub `main` **并通过 CI** 后�
 ```
 
 底层发布命令会锁定并串行执行部署、保留上一版本，并在切换后的健康检查失败时回滚应用。
+健康检查还会把 `GET /health/live` 报告的 `commit`（读自该 release 的 `.mcs21-release` 文件；
+设置了 `APP_COMMIT` 时读它）与刚部署的 commit 比较，不一致也会回滚，这样重启后仍在跑旧代码的
+情况不会被当作部署成功。
 自动数据库步骤只包括备份和生产 SQL 只读核验。运行账户不能修改 Schema，自动部署服务也
 没有 MySQL 管理员或迁移凭据。因此，Schema 变化必须按照
 [DEPLOYMENT.zh-CN.md](DEPLOYMENT.zh-CN.md) 单独提供并评审 DBA SQL 发布，并且必须在推送依赖

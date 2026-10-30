@@ -25,7 +25,10 @@ branch -> pull request -> merge into main -> CI passes on that commit
 ```
 
 The underlying release command serializes deployments, preserves the prior release, and rolls
-the application back when its post-switch health check fails. Automatic database handling is
+the application back when its post-switch health check fails. The health check also compares the
+`commit` that `GET /health/live` reports (read from the release's `.mcs21-release` file, or from
+`APP_COMMIT` when that is set) with the commit just deployed, and rolls back if they differ, so a
+restart that left old code running cannot pass as a successful deployment. Automatic database handling is
 limited to backup and read-only production SQL verification. The runtime account cannot alter
 the schema, and the automatic deployment service has no MySQL administrator or migration
 credential. A schema change therefore requires a separately reviewed DBA SQL release, and it must be

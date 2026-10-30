@@ -440,9 +440,9 @@ dumps, and objects in a private temporary directory that is removed on exit.
 
 ## Staging installation record (2026-09-24)
 
-- Backup account `fyp_backup_user@172.29.21.1`, created from `04-backup-account.sql` with the
+- Backup account `fyp_backup_user@<docker-gateway>`, created from `04-backup-account.sql` with the
   host changed: MySQL runs in Docker, so TCP connections from the host arrive from the Docker
-  gateway `172.29.21.1`, like every other staging account, and a `localhost` account cannot
+  gateway `<docker-gateway>`, like every other staging account, and a `localhost` account cannot
   log in. Verified as `fypapp`: TLS (`TLS_AES_256_GCM_SHA384`), reads, and `DELETE` refused.
 - `/etc/fyp-secure-file-platform/backup.env` (root, 0600) and `backup_pub.pem` (root:fypapp,
   0640; SHA-256 of the key `4ac77119…`, as recorded in every set's `index.json`).

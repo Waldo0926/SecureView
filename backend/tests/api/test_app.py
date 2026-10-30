@@ -1,8 +1,10 @@
+from pathlib import Path
+
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.testclient import TestClient
 
 from app.core.config import Settings
-from app.main import create_app
+from app.main import create_app, resolve_commit
 
 
 def test_liveness_endpoint() -> None:
@@ -11,6 +13,32 @@ def test_liveness_endpoint() -> None:
 
     assert response.status_code == 200
     assert response.json()["status"] == "ok"
+
+
+def test_liveness_reports_the_configured_commit() -> None:
+    sha = "0123456789abcdef0123456789abcdef01234567"
+    with TestClient(create_app(Settings(_env_file=None, APP_COMMIT=sha))) as client:
+        response = client.get("/health/live")
+
+    assert response.json() == {"status": "ok", "commit": sha}
+
+
+def test_commit_falls_back_to_the_release_identity_file(tmp_path: Path) -> None:
+    # mcs21-deploy writes the deployed SHA to .mcs21-release at the release root.
+    identity = tmp_path / ".mcs21-release"
+    identity.write_text("ABCDEF0123456789abcdef0123456789abcdef01\n", encoding="utf-8")
+    unset = Settings(_env_file=None)
+
+    assert resolve_commit(unset, identity) == "abcdef0123456789abcdef0123456789abcdef01"
+    assert resolve_commit(unset, tmp_path / "missing") is None
+
+
+def test_commit_that_is_not_a_sha_is_not_reported(tmp_path: Path) -> None:
+    identity = tmp_path / ".mcs21-release"
+    identity.write_text("<script>\n", encoding="utf-8")
+
+    assert resolve_commit(Settings(_env_file=None, APP_COMMIT="main"), identity) is None
+    assert resolve_commit(Settings(_env_file=None), identity) is None
 
 
 def test_openapi_schema_can_be_generated() -> None:
