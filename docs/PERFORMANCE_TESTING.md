@@ -88,17 +88,10 @@ limits on and needs no tunnel or sshd change.
 Running the generator **on** the VPS itself would avoid the network but take CPU from the server
 being measured, so it is not recommended.
 
-**The tunnel needs an sshd exception.** The server's sshd sets `AllowTcpForwarding no`, and the
-only exception (`Match User jason,junyan,charter`) permits `127.0.0.1:3306`, so the tunnel above
-opens a local port but every request is reset. For the 2026-10-03 run a root-only block was
-appended to `/etc/ssh/sshd_config` (back up first, `sshd -t`, `systemctl reload ssh`) and the
-backup restored afterwards:
-
-```text
-Match User root
-    AllowTcpForwarding local
-    PermitOpen 127.0.0.1:8000
-```
+**The tunnel needs an sshd exception.** Port forwarding is turned off on the server by
+default, so the tunnel above opens a local port but every request is reset. For the 2026-10-03
+run a temporary forwarding exception limited to `127.0.0.1:8000` was added to the sshd config and
+removed again after the run. The exact server config is kept out of this copy.
 
 Add `-o ServerAliveInterval=15` to the tunnel for long runs.
 

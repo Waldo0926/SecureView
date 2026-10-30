@@ -20,7 +20,7 @@
 
 | 方法 | 端点 | 说明 |
 |---|---|---|
-| GET | `/health/live` | 进程存活检查，不检查依赖 |
+| GET | `/health/live` | 进程存活检查，并报告正在运行的 `commit`（未知时为 null），不检查依赖 |
 | GET | `/health/ready` | 数据库连通性及精确应用 Schema revision 标记检查 |
 
 ## 响应、认证与错误契约

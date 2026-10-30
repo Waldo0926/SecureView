@@ -133,7 +133,7 @@ class AuditRepository:
             .offset(offset)
             .limit(limit)
         )
-        return [row._tuple() for row in rows]
+        return [tuple(row) for row in rows]
 
     def file_labels(self, file_uuids: Iterable[str]) -> dict[str, tuple[str, bool]]:
         """Original filename and whether it was deleted, for the files these audit rows are about.

@@ -264,7 +264,7 @@ class RecoveryRepository:
             .execution_options(populate_existing=True)
             .limit(1)
         ).one_or_none()
-        return None if row is None else row._tuple()
+        return None if row is None else tuple(row)
 
     def get_execution_record(self, request_id: UUID) -> RecoveryExecutionRecord | None:
         row = self.db.execute(

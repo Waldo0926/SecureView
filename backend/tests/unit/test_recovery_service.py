@@ -101,7 +101,7 @@ class FakeRepository:
         self.request_record = None
         self.has_download_entitlement = True
         self.execution_record: RecoveryExecutionRecord | None = None
-        self.list_requested_by: int | None | object = object()
+        self.list_requested_by: int | object | None = object()
         self.active_recovery_keys: list[Any] = []
         self.recovery_key_by_uuid = None
         self.recovery_key_by_fingerprint = None

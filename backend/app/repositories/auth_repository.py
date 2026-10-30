@@ -119,7 +119,7 @@ class AuthRepository:
         ).one_or_none()
         if row is None:
             return None
-        return row._tuple()
+        return tuple(row)
 
     def lock_session(self, session_id: int) -> UserSession | None:
         return self.db.scalar(

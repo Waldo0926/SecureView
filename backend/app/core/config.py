@@ -20,6 +20,10 @@ _LOCAL_CORS_ORIGINS = ["http://localhost:5173", "http://127.0.0.1:5173"]
 class Settings(BaseSettings):
     APP_NAME: str = "Secure File Encryption Platform"
     APP_VERSION: str = "0.1.0"
+    # The commit this process is running, reported by /health/live. When unset, the
+    # `.mcs21-release` file that mcs21-deploy writes at the release root is read instead, so a
+    # deployed release reports its commit without the shared env file changing per deploy.
+    APP_COMMIT: str | None = None
     APP_ENV: str = "development"
     APP_DEBUG: bool = True
     # Serve /docs, /redoc and /openapi.json.

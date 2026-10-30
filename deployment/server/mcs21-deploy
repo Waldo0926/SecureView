@@ -13,7 +13,7 @@ current_link="$app_root/current"
 previous_link="$app_root/previous"
 env_file="/etc/fyp-secure-file-platform/backend.env"
 mysql_container="mcs21-mysql"
-mysql_account_host="172.29.21.1"
+mysql_account_host="<docker-gateway>"
 backup_root="/var/backups/mcs21-deploy"
 # Pre-deploy sets kept as fast rollback points. Each one also archives every ciphertext object,
 # so an unpruned directory grew to 178 sets and 76 GB by 2026-10-08. Off-server copies are the
@@ -122,6 +122,16 @@ show_status() {
   else
     printf 'health=failed\n'
   fi
+  local live_sha
+  live_sha="$(live_commit || true)"
+  printf 'live_commit=%s\n' "${live_sha:-unknown}"
+}
+
+# The commit the running backend reports on /health/live (read from the release's
+# .mcs21-release file). Prints nothing when the probe fails or the commit is unknown.
+live_commit() {
+  curl -fsS --header "Host: $public_host" --max-time 3 "$health_url" \
+    | sed -n 's/.*"commit":"\([0-9a-f]*\)".*/\1/p'
 }
 
 fetch_main() {
@@ -337,6 +347,14 @@ verify_live() {
   return 1
 }
 
+restore_previous() {
+  local old_target="$1"
+  atomic_link "$old_target" "$current_link"
+  systemctl restart fyp-backend || true
+  systemctl reload nginx || true
+  verify_live || true
+}
+
 # Ops units that a release may install by itself. The list is closed on purpose: a unit placed
 # in /etc/systemd/system runs as whatever user it names, so letting any file in a release become
 # one would turn "a commit that passed CI" into "arbitrary code as root". Each name here must
@@ -390,7 +408,7 @@ install_ops_units() {
 }
 
 deploy_release() {
-  local sha release old_target backup_dir
+  local sha release old_target backup_dir live_sha
   fetch_main
   sha="$(resolve_target)"
   printf 'Preparing commit %s\n' "$sha"
@@ -407,14 +425,19 @@ deploy_release() {
   systemctl reload nginx
   if ! verify_live; then
     printf 'Health check failed; restoring previous code release. Database was not changed by this deployment.\n' >&2
-    atomic_link "$old_target" "$current_link"
-    systemctl restart fyp-backend || true
-    systemctl reload nginx || true
-    verify_live || true
+    restore_previous "$old_target"
     die "live health check failed after deploying $sha; code link restored"
   fi
+  # A healthy answer from the wrong code (a restart that did not take, a stale process on the
+  # port) would otherwise pass as a successful deployment of $sha.
+  live_sha="$(live_commit || true)"
+  if [[ "$live_sha" != "$sha" ]]; then
+    printf 'The live backend reports commit %s, not %s; restoring previous code release. Database was not changed by this deployment.\n' "${live_sha:-unknown}" "$sha" >&2
+    restore_previous "$old_target"
+    die "live backend reports commit ${live_sha:-unknown} after deploying $sha; code link restored"
+  fi
   audit success "commit=$sha backup=$backup_dir previous=$(printf '%q' "$old_target")"
-  printf 'Deployment succeeded.\n'
+  printf 'Deployment succeeded; the live backend reports commit %s.\n' "$live_sha"
   # Only after a healthy deployment, so a failing one never shortens the rollback history.
   local pruned
   if pruned="$(prune_backups "$keep_backups")"; then

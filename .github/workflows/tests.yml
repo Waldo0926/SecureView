@@ -26,9 +26,9 @@ jobs:
       run:
         working-directory: backend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -36,7 +36,7 @@ jobs:
         run: pip install uv
 
       - name: Cache uv download cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/uv
           key: uv-${{ runner.os }}-${{ hashFiles('backend/requirements.txt', 'backend/requirements-dev.txt') }}
@@ -83,7 +83,7 @@ jobs:
 
       - name: Upload test reports
         if: always() && steps.hygiene.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: backend-test-reports
           path: ${{ runner.temp }}/reports/backend
@@ -96,9 +96,9 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "22"
           cache: npm
@@ -127,7 +127,7 @@ jobs:
 
       - name: Upload test reports
         if: always() && steps.hygiene.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: frontend-test-reports
           path: ${{ runner.temp }}/reports/frontend
@@ -158,9 +158,9 @@ jobs:
           --health-timeout=5s
           --health-retries=20
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -168,7 +168,7 @@ jobs:
         run: pip install uv
 
       - name: Cache uv download cache
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/uv
           key: uv-${{ runner.os }}-${{ hashFiles('backend/requirements.txt', 'backend/requirements-dev.txt') }}
@@ -285,7 +285,7 @@ jobs:
 
       - name: Upload test reports
         if: always() && steps.hygiene.outcome == 'success'
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: mysql-gate-test-reports
           path: ${{ runner.temp }}/reports/mysql-gate
@@ -318,7 +318,7 @@ jobs:
 
       - name: Keep the restore drill report
         if: success()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: restore-drill-report
           path: ${{ runner.temp }}/restore-drill-report.json

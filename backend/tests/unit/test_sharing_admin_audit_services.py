@@ -542,8 +542,7 @@ class CapturingSharingDb:
 
     def execute(self, statement):
         self.statements.append(statement)
-        row = SimpleNamespace(_tuple=lambda: (self.grant, self.disabled_user, self.key))
-        return [row]
+        return [(self.grant, self.disabled_user, self.key)]
 
 
 def _where_clause(statement) -> str:
