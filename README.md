@@ -16,7 +16,7 @@
 ![MySQL](https://img.shields.io/badge/MySQL-8.4-4479a1?logo=mysql&logoColor=white)
 [![Tests](https://github.com/Waldo0926/SecureView/actions/workflows/tests.yml/badge.svg?branch=main)](https://github.com/Waldo0926/SecureView/actions/workflows/tests.yml)
 
-**Synced with the team repository on 18 October 2026 (team commit `16d41ba`).**
+**Synced with the team repository on 30 October 2026 (team commit `051cc8e`).**
 
 ## Overview
 
@@ -32,14 +32,14 @@ SecureView runs in production at **[https://secureview.tech](https://secureview.
 |---|---|
 | **What** | Web app for storing and sharing files that are encrypted in the browser |
 | **Team** | Four students, Final Year Project (FIT3161/FIT3162, team MCS21) |
-| **My part** | Authored 182 of the team's 203 merged PRs: testing and CI, security features, deployment and operations |
+| **My part** | Authored 187 of the team's 212 merged PRs: testing and CI, security features, deployment and operations |
 | **Stack** | Vue 3 + TypeScript, FastAPI, MySQL 8.4, Nginx, Docker, GitHub Actions |
 | **Tests** | 718 backend unit tests, 786-test MySQL suite at 86.6% coverage, 899 frontend tests, 977 live frontend tests, 57 browser tests |
 | **Load test** | 22,264 operations with 0 integrity failures; fixed a 100-user bug that took upload failures from up to 78% to 0% |
 
 ## My Contributions
 
-As of **17 October 2026**, I authored **182 of the project's 203 merged pull requests** (**190 authored PRs** in total) and opened **29 issues**. Every PR merged after 6 October is mine.
+As of **30 October 2026**, I authored **187 of the project's 212 merged pull requests** (**195 authored PRs** in total) and opened **29 issues**. Every PR merged after 6 October is mine, apart from four Dependabot updates.
 
 ### Testing and quality engineering
 
@@ -64,7 +64,7 @@ As of **17 October 2026**, I authored **182 of the project's 203 merged pull req
 
 ### Deployment, operations and documentation
 
-- Built and maintained guarded automatic deployment of exact CI-passed commits.
+- Built and maintained guarded automatic deployment of exact CI-passed commits. After each deploy it checks that the live backend reports the new commit, and rolls back if not.
 - Deployed and hardened Nginx/HTTPS, security headers, rate limiting and fail2ban.
 - Added encrypted off-server backups, clean-host restore verification, reconciliation, monitoring and redacted operational evidence.
 - Maintained bilingual architecture, security, threat-model, testing, performance and release documentation, plus final-presentation evidence.
@@ -219,9 +219,9 @@ How the team ran it locally is in **[docs/DEVELOPER_GUIDE.md](docs/DEVELOPER_GUI
 
 ## About This Copy
 
-This is a snapshot of the four-person team repository, published as one commit. The commit history and pull requests stay in the team repository, so git blame here does not show who wrote each file. My share of the work is listed in [My Contributions](#my-contributions).
+This is a copy of the four-person team repository. It was first published as one commit and is synced from the team repository from time to time. The commit history and pull requests stay in the team repository, so git blame here does not show who wrote each file. My share of the work is listed in [My Contributions](#my-contributions).
 
-Removed before publishing: test account passwords, the CI runner host setup, and the server's public IP and backup bucket name.
+Removed before publishing: test account passwords, the CI runner host setup, the server's public IP, the backup bucket name, the internal Docker gateway address and the server's sshd rules.
 
 The backend unit tests, the frontend tests and the MySQL 8.4 release gate run in this repository too, on GitHub-hosted runners (`.github/workflows/tests.yml`), so the badge at the top reflects this copy of the code. The live end-to-end job and the tamper drill need the removed test accounts and are not run here.
 
